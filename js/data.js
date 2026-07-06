@@ -14,7 +14,7 @@
    ============================================================ */
 const DB = {};
 
-DB.BUILD = '1.3.0';
+DB.BUILD = '1.3.1';
 
 DB.CAPS = { bilanciere: 72, gilet: 24, manubrio: 8 };
 DB.PESO_BILANCIERE = 6;          // sia classico che EZ
@@ -688,28 +688,89 @@ DB.CORSA = {
       id: 'vel_base', nome: 'Velocità — base (costruisci il motore)',
       prog: { tipo: 'serie', base: 5, step: 1, max: 10, cosa: 'accelerazioni' },
       blocchi: liv => [
-        { titolo: 'Scaletta agilità', serie: 2, dettaglio: 'Un giro dei 4 schemi a serie: skip, doppio appoggio, laterale, dentro-fuori', recupero: 45 },
-        { titolo: 'Slalom tra i coni', serie: 4, dettaglio: '6 coni a zig-zag su 20 m: slalom a buona velocità con appoggi corti, ritorno camminando. I cambi di direzione sono il pane del terzino', recupero: 60 },
-        { titolo: 'Accelerazioni progressive', serie: 5 + liv, dettaglio: '60 m l\'una: parti piano e arriva al 90% negli ultimi 20 m', recupero: 120 },
-        { titolo: 'Allunghi', serie: 3, dettaglio: '80 m al 75-80%, sciolti e ampi', recupero: 90 },
+        { titolo: 'Scaletta agilità', serie: 2, dettaglio: 'Un giro dei 4 schemi a serie: skip, doppio appoggio, laterale, dentro-fuori', recupero: 45,
+          come: [
+            'Stendi la scaletta su un tratto piano e asciutto.',
+            'Schema 1 — SKIP: un appoggio per riquadro, ginocchia alte, braccia che pompano.',
+            'Schema 2 — DOPPIO APPOGGIO: due appoggi rapidi per riquadro (dx-sx), busto alto.',
+            'Schema 3 — LATERALE: avanzi di fianco, due appoggi per riquadro, poi torna con l\'altro fianco.',
+            'Schema 4 — DENTRO-FUORI: piedi dentro il riquadro poi fuori larghi, avanzando.',
+            'Guarda avanti, non i piedi. Prima la precisione, poi la velocità.',
+          ] },
+        { titolo: 'Slalom tra i coni', serie: 4, dettaglio: '6 coni a zig-zag su 20 m: slalom a buona velocità con appoggi corti, ritorno camminando. I cambi di direzione sono il pane del terzino', recupero: 60,
+          come: [
+            'Sistema 6 coni in linea, uno ogni 3-4 metri (20 m totali), sfalsati di un metro a destra e a sinistra a zig-zag.',
+            'Parti al 70-80%: curva stretta attorno a ogni cono, NON larga.',
+            'Al cambio di direzione: passi corti e rapidi, baricentro basso, spingi col piede esterno.',
+            'Il busto anticipa la direzione nuova, le braccia aiutano la sterzata.',
+            'Torna camminando al via: la qualità di ogni slalom vale più della velocità media.',
+          ] },
+        { titolo: 'Accelerazioni progressive', serie: 5 + liv, dettaglio: '60 m l\'una: parti piano e arriva al 90% negli ultimi 20 m', recupero: 120,
+          come: [
+            'Misura 60 m: due coni distanti 75 passi normali (o usa i lampioni come riferimento).',
+            'Primi 20 m: corsa facile, ampia e rilassata.',
+            'Secondi 20 m: aumenta gradualmente spinta e frequenza.',
+            'Ultimi 20 m: al 90%, spalle basse e viso rilassato (se digrigni i denti sei troppo teso).',
+            'Non è uno sprint secco: è imparare ad accelerare con tecnica pulita.',
+          ] },
+        { titolo: 'Allunghi', serie: 3, dettaglio: '80 m al 75-80%, sciolti e ampi', recupero: 90,
+          come: [
+            'Circa 100 passi normali di distanza, su tratto piano.',
+            'Corri "grande": falcata ampia, ginocchia che salgono, braccia sciolte.',
+            'Il ritmo è controllato: devi sentirti elegante, non affaticato.',
+          ] },
       ],
     },
     forza: {
       id: 'vel_forza', nome: 'Velocità — sprint massimali',
       prog: { tipo: 'serie', base: 5, step: 1, max: 10, cosa: 'sprint col paracadute' },
       blocchi: liv => [
-        { titolo: 'Scaletta rapida', serie: 2, dettaglio: 'Un giro dei 3 schemi a serie, alla massima frequenza di appoggi', recupero: 45 },
-        { titolo: 'Sprint con paracadute', serie: 5 + liv, dettaglio: '30 m al 100% con paracadute. La qualità vale più della quantità: recupero completo', recupero: 180 },
-        { titolo: 'Partenze varie', serie: 4, dettaglio: '20 m senza paracadute: partenza in piedi, seduto, prono, dopo giro su te stesso', recupero: 120 },
+        { titolo: 'Scaletta rapida', serie: 2, dettaglio: 'Un giro dei 3 schemi a serie, alla massima frequenza di appoggi', recupero: 45,
+          come: [
+            'Skip, doppio appoggio e laterale: stavolta alla MASSIMA frequenza di piedi.',
+            'Contatti a terra brevissimi, come su carboni ardenti.',
+            'Se sbagli un riquadro non fermarti: la fluidità conta più della precisione oggi.',
+          ] },
+        { titolo: 'Sprint con paracadute', serie: 5 + liv, dettaglio: '30 m al 100% con paracadute. La qualità vale più della quantità: recupero completo', recupero: 180,
+          come: [
+            'Allaccia la cintura del paracadute in vita, paracadute dietro di te a terra.',
+            'Misura 30 m con due coni (circa 38 passi normali).',
+            'Partenza in leggero affondo: spingi forte i primi 10 m con il busto inclinato avanti.',
+            'Il paracadute si apre da solo e ti frena: tu continua a spingere al massimo fino al cono.',
+            'Recupero COMPLETO (3\'): lo sprint massimale funziona solo se sei fresco. Se rallenti vistosamente, fermati.',
+          ] },
+        { titolo: 'Partenze varie', serie: 4, dettaglio: '20 m senza paracadute: partenza in piedi, seduto, prono, dopo giro su te stesso', recupero: 120,
+          come: [
+            'Togli il paracadute: ora sei "leggero" e veloce (è l\'effetto contrasto).',
+            'Serie 1: partenza in piedi normale. Serie 2: da seduto a terra. Serie 3: sdraiato a pancia in giù. Serie 4: giro su te stesso e via.',
+            'Simulano le partenze sporche della partita: reattività da qualsiasi posizione.',
+          ] },
       ],
     },
     potenza: {
       id: 'vel_potenza', nome: 'Velocità — RSA (sprint ripetuti da gara)',
       prog: { tipo: 'serie', base: 6, step: 1, max: 10, cosa: 'sprint per blocco' },
       blocchi: liv => [
-        { titolo: 'RSA — blocco 1', serie: 6 + liv, dettaglio: '40 m al massimo, poi torna camminando veloce: hai solo 20" tra gli sprint', recupero: 20 },
-        { titolo: 'RSA — blocco 2', serie: 6 + liv, dettaglio: 'Come il blocco 1, dopo 4\' di recupero completo', recupero: 20 },
-        { titolo: 'Navette con i coni', serie: 4, dettaglio: '10+20+10 m con cambi di senso sui coni', recupero: 90 },
+        { titolo: 'RSA — blocco 1', serie: 6 + liv, dettaglio: '40 m al massimo, poi torna camminando veloce: hai solo 20" tra gli sprint', recupero: 20,
+          come: [
+            'Due coni a 40 m (circa 50 passi normali).',
+            'Sprint al massimo fino al cono, poi girati e torna camminando VELOCE verso il via.',
+            'Spunta la serie e riparti quando la pillola suona: 20" passano subito, è voluto.',
+            'È l\'allenamento più simile alla partita: sprint ripetuti con recupero incompleto.',
+            'Obiettivo: che l\'ultimo sprint sia veloce quasi quanto il primo.',
+          ] },
+        { titolo: 'RSA — blocco 2', serie: 6 + liv, dettaglio: 'Come il blocco 1, dopo 4\' di recupero completo', recupero: 20,
+          come: [
+            'Prima di iniziare: 4\' di recupero vero (cammina, bevi un sorso).',
+            'Poi identico al blocco 1: stessi 40 m, stessi 20" tra gli sprint.',
+          ] },
+        { titolo: 'Navette con i coni', serie: 4, dettaglio: '10+20+10 m con cambi di senso sui coni', recupero: 90,
+          come: [
+            'Tre coni in linea: A (via), B a 10 m, C a 30 m da A.',
+            'Sprint A→B, tocca terra vicino al cono, inverti e vai B→C (20 m), inverti, chiudi C→B (10 m).',
+            'Nel cambio di senso: frena con passi corti, scendi col baricentro, riparti basso.',
+            'Sono i cambi di direzione violenti dei recuperi difensivi.',
+          ] },
       ],
     },
   },
@@ -718,24 +779,48 @@ DB.CORSA = {
       id: 'res_base', nome: 'Resistenza — ripetute tempo',
       prog: { tipo: 'ritmo', base: 115, step: -2, min: 85, unita: 'per 400 m' },
       blocchi: (liv, ritmo) => [
-        { titolo: 'Ripetute 400 m', serie: 5, dettaglio: '400 m in ' + U.fmtRitmo(ritmo) + ' l\'uno: spunta a ogni ripetuta, il timer ti dà i 90" di recupero', recupero: 90 },
-        { titolo: 'Defaticamento', serie: 1, dettaglio: '5\' di corsa blanda + camminata', recupero: 0 },
+        { titolo: 'Ripetute 400 m', serie: 5, dettaglio: '400 m in ' + U.fmtRitmo(ritmo) + ' l\'uno: spunta a ogni ripetuta, il timer ti dà i 90" di recupero', recupero: 90,
+          come: [
+            'Misura i 400 m una volta sola col contachilometri del telefono (Google Maps o un\'app di corsa) e segnati i punti di inizio e fine: da lì in poi li riusi sempre.',
+            'Parti col cronometro dell\'app (scheda TIMER) o del telefono: il tempo target è quello scritto sopra.',
+            'Ritmo COSTANTE: non partire a razzo per poi morire. Sbagli di poco? Va bene: entro 3-4 secondi dal target.',
+            'Spunta la ripetuta, il timer ti dà i 90": respira con le mani sopra la testa e riparti.',
+            'Quando completi tutte le ripetute al ritmo giusto, la prossima volta il target scende di 2 secondi.',
+          ] },
+        { titolo: 'Defaticamento', serie: 1, dettaglio: '5\' di corsa blanda + camminata', recupero: 0,
+          come: ['Corsa lentissima, quasi camminata: il cuore scende gradualmente e le gambe si sciolgono.'] },
       ],
     },
     forza: {
       id: 'res_forza', nome: 'Resistenza — fartlek (cambi di ritmo)',
       prog: { tipo: 'serie', base: 8, step: 1, max: 14, cosa: 'cambi di ritmo' },
       blocchi: liv => [
-        { titolo: 'Fartlek', serie: 8 + liv, dettaglio: '30" forte al 85-90%, deciso ma controllato: spunta a ogni tratto forte, il timer ti dà i 90" piano', recupero: 90 },
-        { titolo: 'Defaticamento', serie: 1, dettaglio: '5\' blandi', recupero: 0 },
+        { titolo: 'Fartlek', serie: 8 + liv, dettaglio: '30" forte al 85-90%, deciso ma controllato: spunta a ogni tratto forte, il timer ti dà i 90" piano', recupero: 90,
+          come: [
+            'Scegli un percorso dove puoi correre libero, senza incroci.',
+            'Tratto FORTE: 30" all\'85-90% — un ritmo che potresti tenere per 2-3 minuti al massimo. Usa i lampioni o gli alberi come traguardi.',
+            'Spunta la serie: il timer ti dà 90" di corsa PIANO (non camminare: trotto leggero).',
+            'È il ritmo-partita: strappi e rifiati, strappi e rifiati.',
+            'L\'ultimo tratto forte deve assomigliare al primo: se crolli, il ritmo dei tratti forti era troppo alto.',
+          ] },
+        { titolo: 'Defaticamento', serie: 1, dettaglio: '5\' blandi', recupero: 0,
+          come: ['Trotto leggerissimo e camminata finale.'] },
       ],
     },
     potenza: {
       id: 'res_potenza', nome: 'Resistenza — intermittente 15-15',
       prog: { tipo: 'ritmo', base: 58, step: 2, max: 80, unita: 'm ogni 15"', crescente: true },
       blocchi: (liv, dist) => [
-        { titolo: '15-15 — blocco 1', serie: 1, dettaglio: '8\' di: 15" di corsa coprendo ' + dist + ' m / 15" fermo o camminando. Usa i coni per misurare la distanza', recupero: 180 },
-        { titolo: '15-15 — blocco 2', serie: 1, dettaglio: '8\' come il blocco 1, dopo 3\' di recupero', recupero: 0 },
+        { titolo: '15-15 — blocco 1', serie: 1, dettaglio: '8\' di: 15" di corsa coprendo ' + dist + ' m / 15" fermo o camminando. Usa i coni per misurare la distanza', recupero: 180,
+          come: [
+            'Metti due coni a ESATTAMENTE ' + dist + ' m (misura col contachilometri del telefono o contando i passi: un passo lungo ≈ 1 metro).',
+            'Al via: 15" per arrivare al cono opposto. Poi 15" FERMO o camminando. Poi riparti verso l\'altro cono.',
+            'Avanti così per 8 minuti: usa il timer dell\'app in modalità cronometro, o un audio 15-15 dal telefono.',
+            'Arrivi al cono in anticipo? Bene. Non ci arrivi per 2-3 volte di fila? La distanza è troppa: accorcia di 2 m.',
+            'Quando completi il blocco, la prossima volta la distanza sale di 2 m: stai correndo più veloce a parità di fatica.',
+          ] },
+        { titolo: '15-15 — blocco 2', serie: 1, dettaglio: '8\' come il blocco 1, dopo 3\' di recupero', recupero: 0,
+          come: ['3\' di recupero camminando, poi identico al blocco 1: stessi coni, stesso ritmo.'] },
       ],
     },
   },
@@ -748,17 +833,43 @@ DB.CORSA_PIOGGIA = {
     id: 'vel_pioggia', nome: 'Velocità — versione garage 🌧',
     prog: { tipo: 'serie', base: 10, step: 1, max: 16, cosa: 'sprint in cyclette' },
     blocchi: liv => [
-      { titolo: 'Scaletta al coperto', serie: 2, dettaglio: 'Un giro dei 4 schemi a serie (l\'eccezione consentita: la scaletta entra in garage)', recupero: 45 },
-      { titolo: 'Sprint in cyclette', serie: 10 + liv, dettaglio: '15" alla massima cadenza, resistenza 7-8, poi il timer ti dà i 45" pedalando piano', recupero: 45 },
-      { titolo: 'Skip alto sul posto', serie: 3, dettaglio: '20" alla massima frequenza', recupero: 60 },
+      { titolo: 'Scaletta al coperto', serie: 2, dettaglio: 'Un giro dei 4 schemi a serie (l\'eccezione consentita: la scaletta entra in garage)', recupero: 45,
+        come: [
+          'Stendi la scaletta sul pavimento del garage, spazio libero attorno.',
+          'Stessi 4 schemi della strada: skip, doppio appoggio, laterale, dentro-fuori.',
+          'A piedi scalzi o con suole pulite: il pavimento non deve essere scivoloso.',
+        ] },
+      { titolo: 'Sprint in cyclette', serie: 10 + liv, dettaglio: '15" alla massima cadenza, resistenza 7-8, poi il timer ti dà i 45" pedalando piano', recupero: 45,
+        come: [
+          'Imposta la resistenza a 7 (o 8 se ti senti forte).',
+          'Al via: 15" pedalando alla MASSIMA cadenza possibile, in piedi sui pedali se serve.',
+          'Spunta la serie: il timer ti dà 45" — scendi a resistenza 2-3 e pedala piano.',
+          'Rimetti la resistenza a 7 negli ultimi 5" di recupero, così riparti subito.',
+        ] },
+      { titolo: 'Skip alto sul posto', serie: 3, dettaglio: '20" alla massima frequenza', recupero: 60,
+        come: [
+          'Sul posto: ginocchia che salgono all\'altezza delle anche, alla massima frequenza.',
+          'Braccia che pompano come in uno sprint vero, appoggi brevissimi sull\'avampiede.',
+        ] },
     ],
   },
   resistenza: {
     id: 'res_pioggia', nome: 'Resistenza — versione garage 🌧',
     prog: { tipo: 'serie', base: 6, step: 1, max: 12, cosa: 'ripetute in cyclette' },
     blocchi: liv => [
-      { titolo: 'Ripetute in cyclette', serie: 6 + liv, dettaglio: '1\' forte a resistenza 7: spunta a ogni ripetuta, il timer ti dà i 2\' piano a resistenza 3', recupero: 120 },
-      { titolo: 'Circuito corpo libero', serie: 2, dettaglio: 'Un giro a serie: 15 squat + 10 affondi per gamba + 30" plank, senza pausa dentro il giro', recupero: 90 },
+      { titolo: 'Ripetute in cyclette', serie: 6 + liv, dettaglio: '1\' forte a resistenza 7: spunta a ogni ripetuta, il timer ti dà i 2\' piano a resistenza 3', recupero: 120,
+        come: [
+          'Resistenza 7: pedala 1 minuto a ritmo FORTE, gambe che bruciano ma cadenza costante.',
+          'Spunta la serie: il timer ti dà 2\' — resistenza 3, pedalata leggera per recuperare.',
+          'Il ritmo forte deve restare uguale dalla prima all\'ultima ripetuta.',
+        ] },
+      { titolo: 'Circuito corpo libero', serie: 2, dettaglio: 'Un giro a serie: 15 squat + 10 affondi per gamba + 30" plank, senza pausa dentro il giro', recupero: 90,
+        come: [
+          '15 squat a corpo libero profondi e controllati.',
+          'Subito dopo: 10 affondi per gamba alternati sul posto.',
+          'Subito dopo: 30" di plank sui gomiti.',
+          'Fine del giro: spunta la serie e riposa i 90" del timer.',
+        ] },
     ],
   },
 };

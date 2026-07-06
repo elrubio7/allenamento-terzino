@@ -242,6 +242,8 @@ const UI = {
           '<div class="es-testata"><strong>' + U.esc(b.titolo) + '</strong>' +
           (nSerie > 1 ? '<span class="chip">' + nSerie + ' serie</span>' : '') + '</div>' +
           '<p class="es-dettaglio">' + U.esc(b.dettaglio) + '</p>' +
+          (b.come ? '<details class="es-esecuzione"><summary>Come si fa</summary><ul>' +
+            b.come.map(v => '<li>' + U.esc(v) + '</li>').join('') + '</ul></details>' : '') +
           serieHtml +
           (b.recupero ? '<div class="es-piede"><span>recupero ' + U.fmtMMSS(b.recupero) + '</span></div>' : '') +
           '</div>';
