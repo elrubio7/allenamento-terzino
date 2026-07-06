@@ -101,9 +101,11 @@ const UI = {
       iso = U.addDays(iso, 1);
     }
 
+    html += '<button class="btn-azione btn-esporta-sett" data-action="esporta-settimana">📤 Salva la settimana come immagine</button>';
+
     /* domenica: si decide la settimana che inizia domani */
     if (E.serveProssima()) {
-      html += '<div class="prossima-box">' + UI.pannelloScelta(true) + '</div>';
+      html += '<div class="prossima-box">' + UI.cardPagella(E.pagella(set), 'Questa settimana finora') + UI.pannelloScelta(true) + '</div>';
     } else if (S.data.prossima) {
       html += '<div class="settimana-testata prossima-fissata">' +
         '<span class="settimana-tipo">🔒 Prossima settimana: <strong>' + nomiTipo[S.data.prossima.tipo] + '</strong> (da domani)</span>' +
@@ -148,7 +150,12 @@ const UI = {
     if (E.serveScarico()) {
       opzioni.push({ id: 'scarico', icona: '🪫', nome: 'Scarico (consigliato)', descr: 'Spingi da più di 4 settimane o il corpo manda segnali: carichi ridotti del 15%, progressione in pausa. Si ricarica per ripartire più forti.' });
     }
-    let html = '<div class="pannello">' +
+    let html = '';
+    /* la pagella della settimana appena chiusa, per scegliere meglio */
+    if (!perProssima && S.data.riepilogo && U.diffDays(S.data.riepilogo.inizio, U.todayISO()) <= 13) {
+      html += UI.cardPagella(S.data.riepilogo, 'La settimana scorsa');
+    }
+    html += '<div class="pannello">' +
       (perProssima
         ? '<h2>Domenica: che settimana sarà la prossima?</h2><p class="pannello-sub">Vale per la settimana che inizia domani, lunedì ' + U.fmtDataBreve(U.addDays(U.mondayOf(U.todayISO()), 7)) + '.</p>'
         : '<h2>Che settimana sarà?</h2><p class="pannello-sub">Si decide una volta, poi la settimana corre sul suo binario fino a domenica.</p>');
@@ -196,6 +203,21 @@ const UI = {
     UI.toast(perProssima ? 'Prossima settimana pronta: parte da sola domani. 🔒' : 'Settimana pronta. Si comincia! 💪');
   },
 
+  /* pagella di una settimana (per la scelta della domenica) */
+  cardPagella(p, titolo) {
+    if (!p || (p.fatte === 0 && p.saltate === 0 && p.partiteGiocate === 0)) return '';
+    const perc = p.tot ? Math.round(p.fatte / p.tot * 100) : 0;
+    let giudizio;
+    if (perc >= 85) giudizio = 'Settimana da professionista. 💪';
+    else if (perc >= 60) giudizio = 'Buona settimana: si può fare ancora meglio.';
+    else giudizio = 'Settimana difficile: capita. Quella nuova è un\'altra storia.';
+    return '<div class="card-prep pagella"><h3>📋 ' + U.esc(titolo) + '</h3><div class="stat-riga">' +
+      '<div class="stat"><strong>' + p.fatte + '/' + p.tot + '</strong><span>sedute fatte</span></div>' +
+      '<div class="stat"><strong>' + p.saltate + '</strong><span>saltate</span></div>' +
+      '<div class="stat"><strong>' + (p.carico || '—') + '</strong><span>carico</span></div>' +
+      '</div><p class="nota-sixpack">' + (p.partiteGiocate ? '⚽ ' + p.partiteGiocate + (p.partiteGiocate === 1 ? ' partita giocata · ' : ' partite giocate · ') : '') + giudizio + '</p></div>';
+  },
+
   /* ============================================================
      PRONTEZZA — check mattutino (30 secondi)
      ============================================================ */
@@ -241,8 +263,70 @@ const UI = {
   },
   chiudiSeduta() {
     UI.sedutaAperta = null;
+    UI.guida = null;
     U.$('#overlay').classList.remove('aperto');
     UI.render();
+  },
+
+  /* ============================================================
+     SEDUTA GUIDATA — un passo alla volta, senza toccare menu
+     ============================================================ */
+  guida: null,   // { iso, passo }
+
+  passiGuida(vm) {
+    const passi = [{ tipo: 'riscaldamento' }];
+    if (vm.blocchi) vm.blocchi.forEach((b, i) => passi.push({ tipo: 'blocco', i }));
+    else vm.esercizi.forEach((e, i) => passi.push({ tipo: 'esercizio', i }));
+    passi.push({ tipo: 'fine' });
+    return passi;
+  },
+
+  vistaGuida(vm) {
+    const iso = vm.iso;
+    const passi = UI.passiGuida(vm);
+    UI.guida.passo = Math.max(0, Math.min(UI.guida.passo, passi.length - 1));
+    const p = UI.guida.passo;
+    const passo = passi[p];
+
+    let html = '<div class="guida-testata">' +
+      '<button class="btn-azione" data-action="guida-esci">‹ esci</button>' +
+      '<div class="guida-progresso">PASSO ' + (p + 1) + '/' + passi.length + '<br><small>' + vm.icona + ' ' + U.esc(vm.nome) + '</small></div>' +
+      '<button class="btn-azione" data-action="guida-avanti" ' + (p >= passi.length - 1 ? 'disabled' : '') + '>salta ›</button></div>' +
+      '<div class="guida-barra"><div class="guida-barra-fill" style="width:' + Math.round(p / (passi.length - 1) * 100) + '%"></div></div>';
+
+    if (passo.tipo === 'riscaldamento') {
+      const risc = vm.pioggia ? DB.RISCALDAMENTI.pioggia : DB.RISCALDAMENTI[vm.tipo];
+      html += '<div class="card-prep"><h3>🔥 ' + U.esc(risc.nome) + '</h3><ol>' +
+        risc.voci.map(v => '<li>' + U.esc(v) + '</li>').join('') + '</ol></div>' +
+        '<button class="btn-primario" data-action="guida-avanti">Riscaldamento fatto ›</button>';
+    } else if (passo.tipo === 'esercizio') {
+      html += UI.cardEsercizio(iso, vm.esercizi[passo.i], passo.i, vm.spunte[passo.i] || [], false) +
+        '<p class="guida-nota">Spunta tutte le serie: si passa avanti da soli. Il recupero parte a ogni spunta.</p>';
+    } else if (passo.tipo === 'blocco') {
+      html += UI.cardBlocco(vm.blocchi[passo.i], passo.i, vm.spunte[passo.i] || [], false) +
+        '<p class="guida-nota">Spunta tutte le serie: si passa avanti da soli.</p>';
+    } else {
+      const str = DB.STRETCHING[vm.tipo];
+      html += '<div class="card-prep"><h3>🧘 ' + U.esc(str.nome) + '</h3><ol>' +
+        str.voci.map(v => '<li>' + U.esc(v) + '</li>').join('') + '</ol></div>' +
+        '<button class="btn-primario" data-action="completa">Seduta completata ✓</button>';
+    }
+    return html;
+  },
+
+  guidaAvanzaSeCompleto() {
+    if (!UI.guida) return;
+    const vm = E.risolviSeduta(UI.guida.iso);
+    if (!vm) return;
+    const passi = UI.passiGuida(vm);
+    const passo = passi[UI.guida.passo];
+    if (!passo) return;
+    let n = null, sp = [];
+    if (passo.tipo === 'esercizio') { n = vm.esercizi[passo.i].serie; sp = vm.spunte[passo.i] || []; }
+    if (passo.tipo === 'blocco') { n = vm.blocchi[passo.i].serie || 1; sp = vm.spunte[passo.i] || []; }
+    if (n == null) return;
+    for (let s = 0; s < n; s++) if (!sp[s]) return;
+    UI.guida.passo = Math.min(UI.guida.passo + 1, passi.length - 1);
   },
 
   renderSeduta() {
@@ -251,6 +335,12 @@ const UI = {
     const vm = E.risolviSeduta(iso);
     if (!vm) { UI.chiudiSeduta(); return; }
     const box = U.$('#overlay-contenuto');
+
+    /* modalità guidata attiva */
+    if (UI.guida && UI.guida.iso === iso && vm.stato === 'da_fare') {
+      box.innerHTML = UI.vistaGuida(vm);
+      return;
+    }
 
     let html = '<div class="seduta-testata">' +
       '<button class="btn-indietro" data-action="chiudi-seduta">‹</button>' +
@@ -271,6 +361,7 @@ const UI = {
       html += '<button class="btn-azione" data-action="swap-apri">🔀 sposta</button>' +
         '<button class="btn-azione" data-action="non-posso">🚫 oggi non posso</button></div>';
       if (UI.swapInCorso) html += UI.swapScelta(iso);
+      if (!vm.soloTest) html += '<button class="btn-primario btn-guida" data-action="guida-avvia">▶ Inizia seduta guidata</button>';
     }
 
     /* banner scarico / prontezza */
@@ -316,26 +407,7 @@ const UI = {
       /* seduta di corsa (nei giorni test i blocchi normali non ci sono: conta il test) */
       if (!vm.soloTest) html += '<p class="corsa-nome">' + U.esc(vm.corsaNome) + (vm.consolidamento ? ' <span class="chip chip-consolida">mantenimento</span>' : '') + '</p>';
       vm.blocchi.forEach((b, i) => {
-        /* come per i pesi: un tasto per ogni ripetuta, il recupero parte alla spunta */
-        const nSerie = b.serie || 1;
-        const sp = vm.spunte[i] || [];
-        let serieHtml = '<div class="serie-riga">';
-        for (let s = 0; s < nSerie; s++) {
-          const fatta = !!sp[s];
-          serieHtml += '<button class="serie-btn ' + (fatta ? 'fatta' : '') + '" ' + (bloccata ? 'disabled' : '') +
-            ' data-action="spunta" data-slot="' + i + '" data-serie="' + s + '" data-rec="' + (b.recupero || 0) + '">' +
-            (fatta ? '✓' : (nSerie === 1 ? 'fatto' : (s + 1))) + '</button>';
-        }
-        serieHtml += '</div>';
-        html += '<div class="card-esercizio">' +
-          '<div class="es-testata"><strong>' + U.esc(b.titolo) + '</strong>' +
-          (nSerie > 1 ? '<span class="chip">' + nSerie + ' serie</span>' : '') + '</div>' +
-          '<p class="es-dettaglio">' + U.esc(b.dettaglio) + '</p>' +
-          (b.come ? '<details class="es-esecuzione"><summary>Come si fa</summary><ul>' +
-            b.come.map(v => '<li>' + U.esc(v) + '</li>').join('') + '</ul></details>' : '') +
-          serieHtml +
-          (b.recupero ? '<div class="es-piede"><span>recupero ' + U.fmtMMSS(b.recupero) + '</span></div>' : '') +
-          '</div>';
+        html += UI.cardBlocco(b, i, vm.spunte[i] || [], bloccata);
       });
     } else {
       vm.esercizi.forEach((ex, i) => {
@@ -365,6 +437,28 @@ const UI = {
       html += '<button class="rpe-btn" data-action="rpe" data-val="' + v + '">' + v + '</button>';
     }
     return html + '</div></div>';
+  },
+
+  /* blocco di corsa: un tasto per ogni ripetuta, il recupero parte alla spunta */
+  cardBlocco(b, i, sp, bloccata) {
+    const nSerie = b.serie || 1;
+    let serieHtml = '<div class="serie-riga">';
+    for (let s = 0; s < nSerie; s++) {
+      const fatta = !!sp[s];
+      serieHtml += '<button class="serie-btn ' + (fatta ? 'fatta' : '') + '" ' + (bloccata ? 'disabled' : '') +
+        ' data-action="spunta" data-slot="' + i + '" data-serie="' + s + '" data-rec="' + (b.recupero || 0) + '">' +
+        (fatta ? '✓' : (nSerie === 1 ? 'fatto' : (s + 1))) + '</button>';
+    }
+    serieHtml += '</div>';
+    return '<div class="card-esercizio">' +
+      '<div class="es-testata"><strong>' + U.esc(b.titolo) + '</strong>' +
+      (nSerie > 1 ? '<span class="chip">' + nSerie + ' serie</span>' : '') + '</div>' +
+      '<p class="es-dettaglio">' + U.esc(b.dettaglio) + '</p>' +
+      (b.come ? '<details class="es-esecuzione"><summary>Come si fa</summary><ul>' +
+        b.come.map(v => '<li>' + U.esc(v) + '</li>').join('') + '</ul></details>' : '') +
+      serieHtml +
+      (b.recupero ? '<div class="es-piede"><span>recupero ' + U.fmtMMSS(b.recupero) + '</span></div>' : '') +
+      '</div>';
   },
 
   cardEsercizio(iso, ex, slot, spunte, bloccata) {
@@ -527,6 +621,7 @@ const UI = {
     }
     if (incomplete && !confirm('Alcune serie non sono spuntate: quegli esercizi non progrediranno. Completare comunque?')) return;
     E.completaSeduta(iso);
+    UI.guida = null;
     T.stopRest();
     UI.renderSeduta();
     UI.renderHeader();
@@ -632,9 +727,52 @@ const UI = {
   /* ============================================================
      PROGRESSI
      ============================================================ */
+  /* metriche disponibili per gli obiettivi stagionali */
+  METRICHE: {
+    squat: { label: 'Squat (kg)', val: () => (S.data.esercizi.squat || {}).carico || null },
+    stacco_rumeno: { label: 'Stacco rumeno (kg)', val: () => (S.data.esercizi.stacco_rumeno || {}).carico || null },
+    hip_thrust: { label: 'Hip thrust (kg)', val: () => (S.data.esercizi.hip_thrust || {}).carico || null },
+    panca_piana: { label: 'Panca piana (kg)', val: () => (S.data.esercizi.panca_piana || {}).carico || null },
+    cooper: { label: 'Cooper (m)', val: () => { const u = E.ultimoTest('cooper'); return u ? u.valori.cooper_m : null; } },
+    yoyo: { label: 'Yo-Yo (m)', val: () => { const u = E.ultimoTest('yoyo'); return u ? u.valori.yoyo_m : null; } },
+    sprint30: { label: 'Sprint 30 m (s)', giu: true, val: () => { const u = E.ultimoTest('brevi'); return u ? u.valori.sprint30 : null; } },
+    salto_lungo: { label: 'Salto in lungo (cm)', val: () => { const u = E.ultimoTest('brevi'); return u ? u.valori.salto_lungo : null; } },
+  },
+
+  cardObiettivi() {
+    const oggi = U.todayISO();
+    let righe = '';
+    S.data.obiettivi.forEach((o, idx) => {
+      const m = UI.METRICHE[o.metrica];
+      if (!m) return;
+      const att = m.val();
+      if (o.iniziale == null && att != null) { o.iniziale = att; S.save(); }
+      let perc = 0;
+      if (att != null && o.iniziale != null && o.target !== o.iniziale) {
+        perc = Math.round((att - o.iniziale) / (o.target - o.iniziale) * 100);
+      }
+      perc = Math.max(0, Math.min(100, perc));
+      const giorni = U.diffDays(oggi, o.scadenza);
+      righe += '<div class="obiettivo"><div class="obiettivo-testa"><strong>' + m.label + ' → ' + o.target + '</strong>' +
+        '<button class="btn-mini" data-action="obiettivo-elimina" data-idx="' + idx + '">🗑</button></div>' +
+        '<div class="barra"><div class="barra-fill" style="width:' + perc + '%"></div></div>' +
+        '<small>' + (att != null ? 'ora: ' + att : 'in attesa del primo dato') + ' · ' + perc + '%' +
+        (giorni >= 0 ? ' · ' + giorni + ' giorni rimasti' : ' · <span class="scaduto">scaduto</span>') + '</small></div>';
+    });
+    const opzioni = Object.entries(UI.METRICHE).map(([id, m]) => '<option value="' + id + '">' + m.label + '</option>').join('');
+    return '<div class="card-prep"><h3>🎯 Obiettivi stagionali</h3>' +
+      (righe || '<p class="vuoto">Fissa un traguardo misurabile: la barra ti dice se sei in linea.</p>') +
+      '<div class="obiettivo-form">' +
+      '<select id="ob-metrica" class="select-giorno">' + opzioni + '</select>' +
+      '<div class="obiettivo-form-riga"><input type="number" id="ob-target" class="select-giorno" placeholder="traguardo" step="any">' +
+      '<input type="date" id="ob-data" class="select-giorno" value="' + U.addDays(oggi, 90) + '"></div>' +
+      '<button class="btn-azione" data-action="obiettivo-aggiungi">+ Aggiungi obiettivo</button></div></div>';
+  },
+
   progressiEx: 'squat',
   vistaProgressi() {
     let html = '<h2 class="titolo-tab">Progressi</h2>';
+    html += UI.cardObiettivi();
 
     /* costanza e carico: la variabile che decide tutto */
     const st = E.statistiche();
@@ -646,8 +784,34 @@ const UI = {
       '<div class="stat"><strong>' + st.ultimi28 + '</strong><span>ultimi 28 giorni</span></div>' +
       '<div class="stat"><strong>' + st.streak + '</strong><span>settimane di fila (3+ sedute)</span></div>' +
       '</div>' +
-      (cronico > 0 ? '<p class="nota-sixpack">Carico ultimi 7 giorni: <strong>' + acuto + '</strong> · media settimanale del mese: <strong>' + cronico + '</strong> (RPE × minuti — vota la fatica a fine seduta per tenerlo aggiornato)</p>' : '<p class="nota-sixpack">Vota la fatica (1-10) a fine seduta: l\'app calcola il carico settimanale e ti avvisa se stai accelerando troppo.</p>') +
-      '</div>';
+      (cronico > 0 ? '<p class="nota-sixpack">Carico ultimi 7 giorni: <strong>' + acuto + '</strong> · media settimanale del mese: <strong>' + cronico + '</strong> (RPE × minuti — vota la fatica a fine seduta per tenerlo aggiornato)</p>' : '<p class="nota-sixpack">Vota la fatica (1-10) a fine seduta: l\'app calcola il carico settimanale e ti avvisa se stai accelerando troppo.</p>');
+
+    /* grafico del carico settimanale (ultime 8 settimane) */
+    const puntiCarico = [];
+    let caricoDati = false;
+    for (let i = 7; i >= 0; i--) {
+      const lun = U.addDays(U.mondayOf(oggi), -7 * i);
+      let tot = 0;
+      for (const s of S.data.storico) {
+        if (s.data >= lun && s.data <= U.addDays(lun, 6)) tot += E.caricoSeduta(s);
+      }
+      if (tot > 0) caricoDati = true;
+      puntiCarico.push({ x: lun, y: tot });
+    }
+    if (caricoDati) {
+      html += '<h4 class="titolo-grafico">Carico settimanale (RPE × minuti)</h4>' + C.linea(puntiCarico, { colore: '#ff7a26' });
+    }
+
+    /* storia della prontezza: quando il corpo si lamenta */
+    const puntiPront = Object.entries(S.data.prontezza)
+      .map(p => ({ x: p[0], y: p[1].punti }))
+      .sort((a, b) => (a.x < b.x ? -1 : 1));
+    if (puntiPront.length >= 2) {
+      html += '<h4 class="titolo-grafico">Prontezza mattutina (10+ verde · 7-9 giallo · 6- rosso)</h4>' +
+        C.linea(puntiPront, { unita: 'pt', colore: '#2fe06f' }) +
+        '<p class="nota-sixpack">Se i punti scendono quando il carico sale, il corpo ti sta parlando: è il momento di uno scarico.</p>';
+    }
+    html += '</div>';
 
     /* carichi */
     const conStoria = Object.keys(DB.ESERCIZI).filter(id => {
@@ -742,6 +906,56 @@ const UI = {
       '<button class="btn-azione btn-pericolo" data-action="azzera">Azzera tutto</button></div>' +
       '<div class="card-prep"><h3>ℹ️ Versione</h3><p>Build <strong>' + DB.BUILD + '</strong> · dati creati il ' + U.fmtData(S.data.creato) + '<br>' +
       'Sedute nello storico: ' + S.data.storico.length + '</p></div>';
+  },
+
+  /* la settimana come immagine da salvare o condividere */
+  esportaSettimana() {
+    const set = S.data.settimana;
+    if (!set) { UI.toast('Nessuna settimana attiva da esportare.'); return; }
+    const nomiTipo = { una: '1 PARTITA', due: '2 PARTITE', costruzione: 'COSTRUZIONE', scarico: 'SCARICO' };
+    const colori = { forza: '#ff7a26', alta: '#a78bfa', velocita: '#ffc226', resistenza: '#3fc6f5', attivazione: '#ff4d5e', recupero: '#2dd4bf', partita: '#2fe06f' };
+    const giorni = Object.keys(set.giorni).sort();
+    const W = 720, RH = 66, TOP = 116;
+    const cv = document.createElement('canvas');
+    cv.width = W; cv.height = TOP + RH * giorni.length + 34;
+    const ctx = cv.getContext('2d');
+
+    ctx.fillStyle = '#0a0c10';
+    ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.fillStyle = '#f2f5f9';
+    ctx.font = 'italic 900 34px Segoe UI, Arial';
+    ctx.fillText('⚽ TERZINO', 28, 52);
+    ctx.fillStyle = '#8b95a7';
+    ctx.font = '700 16px Segoe UI, Arial';
+    ctx.fillText('SETTIMANA ' + U.fmtDataBreve(set.inizio) + ' – ' + U.fmtDataBreve(U.sundayOf(set.inizio)) + '  ·  ' + (nomiTipo[set.tipo] || ''), 28, 84);
+
+    giorni.forEach((iso, i) => {
+      const g = set.giorni[iso];
+      const y = TOP + i * RH;
+      ctx.fillStyle = '#13161c';
+      ctx.fillRect(24, y, W - 48, RH - 10);
+      ctx.fillStyle = colori[g.tipo] || '#8b95a7';
+      ctx.fillRect(24, y, 6, RH - 10);
+      ctx.fillStyle = '#f2f5f9';
+      ctx.font = '900 18px Segoe UI, Arial';
+      ctx.fillText(U.GIORNI_BREVI[U.dayOfWeek(iso)] + ' ' + U.fmtDataBreve(iso), 48, y + 26);
+      ctx.font = '600 17px Segoe UI, Arial';
+      ctx.fillText(DB.SEDUTE[g.tipo].icona + ' ' + DB.SEDUTE[g.tipo].nome + (g.pioggia ? ' 🌧' : ''), 48, y + 48);
+      ctx.font = '700 20px Segoe UI, Arial';
+      ctx.fillStyle = g.stato === 'fatta' ? '#2fe06f' : (g.stato === 'saltata' ? '#ff4d5e' : '#8b95a7');
+      ctx.fillText(g.stato === 'fatta' ? '✓ FATTA' : (g.stato === 'saltata' ? 'SALTATA' : ''), W - 150, y + 38);
+    });
+
+    cv.toBlob(function (blob) {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'terzino-settimana-' + set.inizio + '.png';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    }, 'image/png');
+    UI.toast('Immagine della settimana salvata. 📤');
   },
 
   esporta() {

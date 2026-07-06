@@ -630,6 +630,41 @@ h2, h3 { text-transform: uppercase; letter-spacing: .03em; }
 .select-corto { width: auto; min-width: 130px; }
 .timer-aggiusta { display: flex; gap: 8px; justify-content: center; width: 100%; margin-top: 10px; }
 
+/* seduta guidata */
+.btn-guida { margin: 0 0 16px; }
+.guida-testata {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin-bottom: 10px;
+}
+.guida-progresso {
+  text-align: center; font-weight: 900; font-size: 1rem;
+  letter-spacing: .08em;
+}
+.guida-progresso small { font-weight: 600; font-size: .72rem; letter-spacing: .02em; }
+.guida-barra {
+  height: 6px; border-radius: 3px; background: var(--carta2);
+  border: 1px solid var(--bordo); overflow: hidden; margin-bottom: 16px;
+}
+.guida-barra-fill { height: 100%; background: var(--accento); transition: width .25s ease; }
+.guida-nota { color: var(--muto); font-size: .8rem; text-align: center; margin-top: 10px; }
+
+/* obiettivi stagionali */
+.obiettivo { margin: 12px 0; }
+.obiettivo-testa { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+.barra {
+  height: 10px; border-radius: 5px; background: var(--carta2);
+  border: 1px solid var(--bordo); overflow: hidden; margin-bottom: 4px;
+}
+.barra-fill { height: 100%; background: linear-gradient(90deg, var(--azzurro), var(--accento)); transition: width .3s; }
+.scaduto { color: var(--rosso); }
+.obiettivo-form { border-top: 1px dashed var(--bordo); margin-top: 12px; padding-top: 12px; display: grid; gap: 8px; }
+.obiettivo-form-riga { display: flex; gap: 8px; }
+.obiettivo-form-riga input { flex: 1; min-width: 0; }
+
+/* pagella ed esporta settimana */
+.pagella { border-left: 4px solid var(--accento); }
+.btn-esporta-sett { display: block; margin: 4px auto 14px; }
+
 /* rifiniture di carattere */
 .btn-primario {
   background: linear-gradient(180deg, var(--accento), #1fb757);

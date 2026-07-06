@@ -14,7 +14,7 @@
    ============================================================ */
 const DB = {};
 
-DB.BUILD = '1.4.1';
+DB.BUILD = '1.5.0';
 
 /* durata tipica delle sedute in minuti (per il calcolo del carico RPE×minuti) */
 DB.DURATE = { forza: 60, alta: 60, velocita: 50, resistenza: 45, attivazione: 25, recupero: 30 };
@@ -63,7 +63,7 @@ DB.ROTAZIONI = {
   spalle:     ['military_press', 'landmine_press'],
   braccia:    ['curl_ez', 'french_press'],
   unilaterale:['bulgaro', 'step_up'],
-  adduttori:  ['copenhagen', 'nordic_curl', 'landmine_rotation'],
+  adduttori:  ['copenhagen', 'landmine_rotation'],
   kettlebell: ['kb_swing', 'kb_stacco_monogamba'],
   core_base:  ['ab_roller', 'alzate_ginocchia'],
   trazioni:   ['trazioni_prona', 'trazioni_supina', 'trazioni_neutra'],
@@ -166,7 +166,7 @@ DB.ESERCIZI = {
     ],
   },
   nordic_curl: {
-    nome: 'Nordic curl (eccentrico)', tipoCarico: 'corpo', rotazione: 'adduttori',
+    nome: 'Nordic curl (eccentrico)', tipoCarico: 'corpo',
     recupero: 90,
     livelli: [
       { label: '3×4 solo discesa, più lenta che puoi', schema: { serie: 3, reps: 4, label: '3×4 negativi' } },
@@ -669,7 +669,8 @@ DB.SEDUTE = {
     nome: 'Forza gambe', icona: '🏋️', luogo: 'garage',
     slots: [
       { ex: 'squat' }, { ex: 'stacco_rumeno' }, { ex: 'hip_thrust' },
-      { rot: 'unilaterale' }, { rot: 'adduttori' }, { rot: 'kettlebell' }, { ex: 'polpacci' },
+      { rot: 'unilaterale' }, { rot: 'adduttori' }, { ex: 'nordic_curl' },
+      { rot: 'kettlebell' }, { ex: 'polpacci' },
     ],
   },
   alta: {

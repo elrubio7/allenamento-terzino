@@ -93,9 +93,15 @@
           const rec = Number(el.dataset.rec) || 0;
           if (rec > 0) T.startRest(rec, 'Recupero');
         }
+        if (UI.guida && UI.guida.iso === iso) UI.guidaAvanzaSeCompleto();
         UI.renderSeduta();
         break;
       }
+
+      /* seduta guidata */
+      case 'guida-avvia': UI.guida = { iso, passo: 0 }; UI.renderSeduta(); break;
+      case 'guida-avanti': if (UI.guida) { UI.guida.passo++; UI.renderSeduta(); } break;
+      case 'guida-esci': UI.guida = null; UI.renderSeduta(); break;
       case 'avvia-recupero': T.startRest(Number(el.dataset.sec) || 60, 'Recupero'); break;
       case 'carico-piu':
       case 'carico-meno': {
@@ -204,6 +210,28 @@
       case 'timer-startpause': T.tabStartPause(); break;
       case 'timer-reset': T.tabReset(); break;
       case 'pillola-salta': T.skipRest(); break;
+
+      /* obiettivi stagionali */
+      case 'obiettivo-aggiungi': {
+        const met = (U.$('#ob-metrica') || {}).value;
+        const target = parseFloat((U.$('#ob-target') || {}).value);
+        const scad = (U.$('#ob-data') || {}).value;
+        if (!met || isNaN(target) || !scad) { UI.toast('Scegli la misura, il traguardo e la data.'); break; }
+        const iniz = UI.METRICHE[met].val();
+        S.data.obiettivi.push({ metrica: met, target, scadenza: scad, iniziale: iniz != null ? iniz : null, creato: U.todayISO() });
+        S.save();
+        UI.render();
+        UI.toast('Obiettivo fissato. Ora si insegue. 🎯');
+        break;
+      }
+      case 'obiettivo-elimina':
+        S.data.obiettivi.splice(Number(el.dataset.idx), 1);
+        S.save();
+        UI.render();
+        break;
+
+      /* immagine della settimana */
+      case 'esporta-settimana': UI.esportaSettimana(); break;
 
       /* dati */
       case 'esporta': UI.esporta(); break;

@@ -124,6 +124,25 @@ E.allarmeCarico = function () {
   return null;
 };
 
+/* ---------- pagella di una settimana ---------- */
+E.pagella = function (set) {
+  if (!set) return null;
+  let fatte = 0, saltate = 0, tot = 0, partiteGiocate = 0;
+  for (const iso of Object.keys(set.giorni)) {
+    const g = set.giorni[iso];
+    if (g.tipo === 'partita') { if (g.stato === 'fatta') partiteGiocate++; continue; }
+    tot++;
+    if (g.stato === 'fatta') fatte++;
+    else if (g.stato === 'saltata') saltate++;
+  }
+  const fine = U.sundayOf(set.inizio);
+  let carico = 0;
+  for (const s of S.data.storico) {
+    if (s.data >= set.inizio && s.data <= fine) carico += E.caricoSeduta(s);
+  }
+  return { inizio: set.inizio, tipo: set.tipo, fatte, saltate, tot, partiteGiocate, carico };
+};
+
 /* ---------- statistiche di costanza ---------- */
 E.statistiche = function () {
   const oggi = U.todayISO();
@@ -317,6 +336,7 @@ E.tick = function () {
   const set = S.data.settimana;
   if (set && oggi > U.sundayOf(set.inizio)) {
     ricordaPartite(set);
+    S.data.riepilogo = E.pagella(set); /* la pagella per la scelta della prossima */
     S.data.settimana = null;
     S.save();
   }
