@@ -14,7 +14,7 @@
    ============================================================ */
 const DB = {};
 
-DB.BUILD = '1.2.0';
+DB.BUILD = '1.3.0';
 
 DB.CAPS = { bilanciere: 72, gilet: 24, manubrio: 8 };
 DB.PESO_BILANCIERE = 6;          // sia classico che EZ
@@ -61,6 +61,7 @@ DB.ROTAZIONI = {
   braccia:    ['curl_ez', 'french_press'],
   unilaterale:['bulgaro', 'step_up'],
   adduttori:  ['copenhagen', 'landmine_rotation'],
+  kettlebell: ['kb_swing', 'kb_stacco_monogamba'],
   core_base:  ['ab_roller', 'alzate_ginocchia'],
   trazioni:   ['trazioni_prona', 'trazioni_supina', 'trazioni_neutra'],
 };
@@ -159,6 +160,44 @@ DB.ESERCIZI = {
       'Ruota il busto portando il bilanciere in arco verso un fianco, ruotando anche il piede.',
       'Torna al centro controllando, poi ruota dall\'altro lato.',
       'Le braccia restano tese: la rotazione parte dal core, non dalle spalle.',
+    ],
+  },
+  kb_swing: {
+    nome: 'Kettlebell swing', tipoCarico: 'corpo', rotazione: 'kettlebell',
+    recupero: 75,
+    livelli: [
+      { label: '3×10 con il kettlebell da 12 kg', schema: { serie: 3, reps: 10, label: '3×10 @ 12 kg' } },
+      { label: '3×12 @ 12 kg', schema: { serie: 3, reps: 12, label: '3×12 @ 12 kg' } },
+      { label: '3×15 @ 12 kg', schema: { serie: 3, reps: 15, label: '3×15 @ 12 kg' } },
+      { label: '4×12 @ 12 kg', schema: { serie: 4, reps: 12, label: '4×12 @ 12 kg' } },
+      { label: '4×15 @ 12 kg', schema: { serie: 4, reps: 15, label: '4×15 @ 12 kg' } },
+      { label: '5×15 @ 12 kg', schema: { serie: 5, reps: 15, label: '5×15 @ 12 kg' } },
+    ],
+    esecuzione: [
+      'Kettlebell a terra davanti a te, piedi poco più larghi delle spalle.',
+      'Anche indietro (come lo stacco rumeno), afferra il kettlebell e falla oscillare tra le gambe.',
+      'Spara le anche in avanti con forza: è quella spinta che fa volare il kettlebell all\'altezza del petto.',
+      'Le braccia sono solo corde: non tirano, accompagnano.',
+      'In alto: corpo in linea, glutei strettissimi. Poi lascia tornare il kettlebell tra le gambe e riparti.',
+    ],
+  },
+  kb_stacco_monogamba: {
+    nome: 'Stacco a una gamba con kettlebell', tipoCarico: 'corpo', rotazione: 'kettlebell',
+    recupero: 60,
+    livelli: [
+      { label: '3×8 per gamba con il kettlebell da 4 kg', schema: { serie: 3, reps: 8, label: '3×8 @ 4 kg' } },
+      { label: '3×10 per gamba @ 4 kg', schema: { serie: 3, reps: 10, label: '3×10 @ 4 kg' } },
+      { label: '3×6 per gamba @ 12 kg', schema: { serie: 3, reps: 6, label: '3×6 @ 12 kg' } },
+      { label: '3×8 per gamba @ 12 kg', schema: { serie: 3, reps: 8, label: '3×8 @ 12 kg' } },
+      { label: '3×10 per gamba @ 12 kg', schema: { serie: 3, reps: 10, label: '3×10 @ 12 kg' } },
+      { label: '3×10 per gamba @ 12 kg con discesa lenta di 3"', schema: { serie: 3, reps: 10, label: '3×10 lento @ 12 kg' } },
+    ],
+    esecuzione: [
+      'In piedi su una gamba, kettlebell nella mano opposta alla gamba d\'appoggio.',
+      'Ginocchio d\'appoggio morbido: inclinati in avanti spingendo l\'anca indietro.',
+      'La gamba libera si distende dietro di te, in linea col busto: corpo a "T".',
+      'Scendi finché senti tirare il femorale, poi risali stringendo il gluteo.',
+      'Bacino sempre parallelo al pavimento: l\'anca della gamba libera non si apre.',
     ],
   },
   polpacci: {
@@ -457,6 +496,144 @@ DB.ESERCIZI = {
   },
 };
 
+/* ---------- DETTAGLI ESERCIZI ----------
+   Per ogni esercizio: A COSA SERVE in campo (perche) e gli
+   ERRORI più comuni da evitare (errori). Mostrati in "Come si esegue". */
+DB.DETTAGLI = {
+  squat: {
+    perche: 'La base di tutto: gambe forti per contrasti, scatti e salti. È l\'esercizio che alza il tetto di tutto il resto.',
+    errori: 'Talloni che si staccano, ginocchia che crollano in dentro, schiena che si arrotonda in fondo.',
+  },
+  stacco_rumeno: {
+    perche: 'Femorali e glutei forti = sprint più potente e meno stiramenti, l\'infortunio più comune del calciatore.',
+    errori: 'Piegare troppo le ginocchia (diventa uno squat) o arrotondare la schiena per scendere di più.',
+  },
+  hip_thrust: {
+    perche: 'I glutei sono il motore dello sprint: più spinta d\'anca = più accelerazione nei primi 10 metri.',
+    errori: 'Spingere inarcando la lombare invece che coi glutei; testa buttata all\'indietro.',
+  },
+  bulgaro: {
+    perche: 'Forza su una gamba sola, come in campo: ogni scatto, salto e contrasto parte da un appoggio singolo.',
+    errori: 'Ginocchio davanti che balla o crolla in dentro; darsi la spinta con la gamba appoggiata dietro.',
+  },
+  step_up: {
+    perche: 'Spinta monopodalica pura: replica la falcata e costruisce ginocchia solide.',
+    errori: 'Darsi lo slancio con la gamba a terra: deve lavorare solo quella sopra la panca.',
+  },
+  copenhagen: {
+    perche: 'Gli adduttori sono il punto debole del terzino (cross, contrasti, cambi di direzione): questo li blinda.',
+    errori: 'Bacino che scende a metà serie: meglio fermarsi che tenere una posizione storta.',
+  },
+  landmine_rotation: {
+    perche: 'Il core che ruota con forza: cross più potenti, tiri più forti, contrasti più solidi.',
+    errori: 'Ruotare con le braccia che si piegano: il movimento parte dai fianchi, le braccia restano tese.',
+  },
+  kb_swing: {
+    perche: 'Potenza pura della catena posteriore: l\'esplosione d\'anca che ti stacca dall\'avversario sul primo passo.',
+    errori: 'Accosciarsi come in uno squat o tirare su il kettlebell con le braccia: è l\'anca che spara, non le spalle.',
+  },
+  kb_stacco_monogamba: {
+    perche: 'Equilibrio e femorali su una gamba sola: prevenzione infortuni da manuale per un terzino.',
+    errori: 'Anca della gamba libera che si apre verso l\'alto; schiena che si arrotonda.',
+  },
+  polpacci: {
+    perche: 'Polpacci elastici = appoggi reattivi, caviglie protette e meno fatica nei finali di partita.',
+    errori: 'Rimbalzare veloce senza controllo: la discesa lenta è metà del lavoro.',
+  },
+  panca_piana: {
+    perche: 'Parte alta solida per reggere i duelli spalla a spalla e proteggere palla.',
+    errori: 'Gomiti larghissimi a 90° (spalle a rischio) e bilanciere che rimbalza sul petto.',
+  },
+  panca_inclinata: {
+    perche: 'Petto alto e spalle: l\'angolo di spinta più simile a quello dei contrasti in piedi.',
+    errori: 'Inarcare la schiena per spingere di più; polsi piegati all\'indietro.',
+  },
+  trazioni_prona: {
+    perche: 'Schiena forte = postura solida, equilibrio nei contrasti e spalle sane. La presa prona lavora di più il dorso largo.',
+    errori: 'Mezze ripetizioni senza distendere le braccia; oscillare con le gambe per aiutarsi.',
+  },
+  trazioni_supina: {
+    perche: 'Dorso più bicipiti: la variante che ti fa fare più ripetizioni e costruisce la trazione totale.',
+    errori: 'Partire a scatti coi gomiti; scendere a peso morto senza controllo.',
+  },
+  trazioni_neutra: {
+    perche: 'La presa più naturale per le spalle: trazione forte a rischio zero.',
+    errori: 'Incassare la testa nelle spalle: parti sempre attivando le scapole.',
+  },
+  dip: {
+    perche: 'Spinta totale di petto, spalle e tricipiti: la forza per schermare palla col corpo.',
+    errori: 'Scendere oltre il controllo con le spalle che salgono verso le orecchie.',
+  },
+  rematore_piedi: {
+    perche: 'Dorso e presa: bilancia tutte le spinte e tiene le spalle in salute per tutta la stagione.',
+    errori: 'Ondeggiare col busto per tirare su il bilanciere: se succede, il carico è troppo.',
+  },
+  rematore_appoggio: {
+    perche: 'Lavoro dorsale a un braccio, stabile e sicuro per la schiena: qualità senza compromessi.',
+    errori: 'Ruotare il busto per portare più su il manubrio.',
+  },
+  military_press: {
+    perche: 'Spalle forti per i duelli aerei e un corpo bilanciato sopra gambe potenti.',
+    errori: 'Inarcare la lombare mentre spingi: glutei e pancia sempre strettissimi.',
+  },
+  landmine_press: {
+    perche: 'Spinta sopra la testa più amica delle spalle, con lavoro anti-rotazione del core in omaggio.',
+    errori: 'Spingere solo di braccio perdendo la linea spalla-anca.',
+  },
+  curl_ez: {
+    perche: 'Bicipiti e avambracci: la presa e le braccia che servono per contrastare e tenere lontano l\'avversario.',
+    errori: 'Dondolare la schiena per sollevare: i gomiti restano incollati ai fianchi.',
+  },
+  french_press: {
+    perche: 'Tricipiti forti completano ogni spinta: panca, dip e braccio teso nei duelli.',
+    errori: 'Gomiti che si aprono verso l\'esterno durante la discesa.',
+  },
+  ab_roller: {
+    perche: 'Core anti-estensione: schiena blindata nei contrasti e forza che passa pulita tra gambe e busto.',
+    errori: 'Lasciare che la lombare si inarchi in fondo alla rollata: fermati prima.',
+  },
+  alzate_ginocchia: {
+    perche: 'Addome basso e flessori dell\'anca: i muscoli che alzano il ginocchio a ogni falcata di sprint.',
+    errori: 'Dondolarsi a pendolo per prendere lo slancio.',
+  },
+  plank_zavorrato: {
+    perche: 'Core che regge sotto carico: la stabilità che non ti fa piegare quando ti vengono addosso.',
+    errori: 'Bacino che scende (o che sale a capanna) quando arriva la fatica.',
+  },
+  hollow_rock: {
+    perche: 'Il core da atleta: la posizione che trasmette forza in sprint, salti e calci.',
+    errori: 'Lombare che si stacca da terra: se succede, alza di più gambe e braccia.',
+  },
+  monster_walk: {
+    perche: 'Accende i glutei prima della gara: anche protette e spinta laterale pronta.',
+    errori: 'Passi troppo lunghi che fanno perdere la tensione della banda.',
+  },
+  pallof_press: {
+    perche: 'Anti-rotazione: il core impara a restare solido quando ti strattonano la maglia.',
+    errori: 'Lasciare che il busto ruoti verso l\'ancoraggio della banda.',
+  },
+  squat_esplosivi: {
+    perche: 'Sveglia il sistema nervoso per domani: gambe reattive senza accumulare fatica.',
+    errori: 'Farne troppi o troppo lenti: è attivazione, non allenamento.',
+  },
+  affondi_dinamici: {
+    perche: 'Mobilità e attivazione insieme: anche pronte per allunghi e cambi di direzione.',
+    errori: 'Busto che crolla in avanti; passo troppo corto.',
+  },
+  balzi_bassi: {
+    perche: 'Caviglie reattive come molle: il primo contatto col terreno domani sarà già acceso.',
+    errori: 'Atterrare di tallone o fare pause tra un balzo e l\'altro.',
+  },
+  cyclette_recupero: {
+    perche: 'Gambe che girano senza impatti: il sangue circola e porta via la fatica della partita.',
+    errori: 'Pedalare troppo forte: se non riesci a parlare, stai andando troppo.',
+  },
+  foam_roller_seq: {
+    perche: 'Scioglie i muscoli induriti dalla partita e accelera il recupero per la settimana.',
+    errori: 'Rullare veloce come una lima: serve lentezza, peso e respiro.',
+  },
+};
+
 /* ---------- SEDUTE (slot per tipo) ----------
    Uno slot può essere: { ex: 'id' } esercizio fisso,
    { rot: 'gruppo' } gruppo a rotazione settimanale,
@@ -466,7 +643,7 @@ DB.SEDUTE = {
     nome: 'Forza gambe', icona: '🏋️', luogo: 'garage',
     slots: [
       { ex: 'squat' }, { ex: 'stacco_rumeno' }, { ex: 'hip_thrust' },
-      { rot: 'unilaterale' }, { rot: 'adduttori' }, { ex: 'polpacci' },
+      { rot: 'unilaterale' }, { rot: 'adduttori' }, { rot: 'kettlebell' }, { ex: 'polpacci' },
     ],
   },
   alta: {
@@ -512,6 +689,7 @@ DB.CORSA = {
       prog: { tipo: 'serie', base: 5, step: 1, max: 10, cosa: 'accelerazioni' },
       blocchi: liv => [
         { titolo: 'Scaletta agilità', serie: 2, dettaglio: 'Un giro dei 4 schemi a serie: skip, doppio appoggio, laterale, dentro-fuori', recupero: 45 },
+        { titolo: 'Slalom tra i coni', serie: 4, dettaglio: '6 coni a zig-zag su 20 m: slalom a buona velocità con appoggi corti, ritorno camminando. I cambi di direzione sono il pane del terzino', recupero: 60 },
         { titolo: 'Accelerazioni progressive', serie: 5 + liv, dettaglio: '60 m l\'una: parti piano e arriva al 90% negli ultimi 20 m', recupero: 120 },
         { titolo: 'Allunghi', serie: 3, dettaglio: '80 m al 75-80%, sciolti e ampi', recupero: 90 },
       ],
@@ -592,7 +770,7 @@ DB.RISCALDAMENTI = {
     voci: [
       'Cyclette 5\' a resistenza 3-4, ritmo medio',
       'Cerchi con le anche e con le caviglie: 10 per senso',
-      'Squat a corpo libero: 2×10 lenti e profondi',
+      'Goblet squat col kettlebell da 4 kg al petto: 2×10 lenti e profondi',
       'Monster walk con banda: 10 passi per direzione',
       'Affondi dinamici: 8 per gamba',
       'Serie di avvicinamento: prima serie di squat solo col bilanciere (6 kg)',

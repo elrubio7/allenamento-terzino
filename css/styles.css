@@ -296,6 +296,8 @@ h2, h3 { text-transform: uppercase; letter-spacing: .03em; }
 }
 .es-esecuzione ul { margin: 6px 0; font-size: .88rem; }
 .ese-fase { color: var(--giallo); }
+.es-perche { color: var(--azzurro); font-size: .85rem; margin: 8px 0 6px; }
+.es-errori { color: var(--giallo); font-size: .85rem; margin: 6px 0 4px; }
 .es-piede {
   display: flex; justify-content: space-between; align-items: center;
   margin-top: 10px; font-size: .76rem; color: var(--muto);

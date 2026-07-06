@@ -153,6 +153,7 @@ E.risolviSlot = function (slot, iso, faseChiave) {
       : schema.label + ' — tetto attrezzatura: +' + (st.extraRep * 5) + '" di tenuta a serie';
   }
 
+  const extra = DB.DETTAGLI[exId] || {};
   return {
     exId, gruppo, nome: ex.nome, big: !!ex.big,
     tipoCarico: ex.tipoCarico,
@@ -161,6 +162,7 @@ E.risolviSlot = function (slot, iso, faseChiave) {
     recupero: ex.big ? fase.recuperoBig : ex.recupero,
     esecuzione: ex.esecuzione,
     esecuzioneFase: ex.big ? fase.esecuzioneBig : null,
+    perche: extra.perche || null, errori: extra.errori || null,
     fastidio: st.fastidio, consolidamento: st.consolidamento,
   };
 };

@@ -306,8 +306,11 @@ const UI = {
     return '<div class="card-esercizio">' +
       '<div class="es-testata"><strong>' + U.esc(ex.nome) + '</strong>' + badges + '</div>' +
       '<div class="es-riga"><span class="es-schema">' + U.esc(ex.schemaLabel) + '</span>' + carico + '</div>' +
-      '<details class="es-esecuzione"><summary>Come si esegue</summary><ul>' +
-      ex.esecuzione.map(v => '<li>' + U.esc(v) + '</li>').join('') + eseFase + '</ul></details>' +
+      '<details class="es-esecuzione"><summary>Come si esegue</summary>' +
+      (ex.perche ? '<p class="es-perche">🎯 A cosa serve: ' + U.esc(ex.perche) + '</p>' : '') +
+      '<ul>' + ex.esecuzione.map(v => '<li>' + U.esc(v) + '</li>').join('') + eseFase + '</ul>' +
+      (ex.errori ? '<p class="es-errori">⚠️ Errori da evitare: ' + U.esc(ex.errori) + '</p>' : '') +
+      '</details>' +
       serie +
       '<div class="es-piede"><span>recupero ' + U.fmtMMSS(ex.recupero || 0) + '</span>' +
       '<button class="btn-mini ' + (ex.fastidio ? 'attivo' : '') + '" data-action="fastidio" data-ex="' + ex.exId + '">' +
