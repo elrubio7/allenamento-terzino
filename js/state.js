@@ -23,6 +23,10 @@ const S = {
       storico: [],              // sedute completate
       test: { cicloInizio: null, pendenti: [], risultati: {} },
       sixpack: { livello: 1, completamenti: 0, storia: [] },
+      prontezza: {},            // dataISO → { punti, livello }  (check mattutino)
+      note: {},                 // exId → nota tecnica personale
+      ultimoBackup: null,       // data dell'ultimo export (per il promemoria)
+      ultimoScarico: null,      // lunedì dell'ultima settimana di scarico
     };
   },
 

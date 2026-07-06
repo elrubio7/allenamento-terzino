@@ -19,6 +19,7 @@
   --viola: #a78bfa;
   --teal: #2dd4bf;
   --raggio: 10px;
+  --fase: #38bdf8; /* il colore della fase corrente (impostato via JS) */
   --font-display: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
@@ -527,6 +528,121 @@ h2, h3 { text-transform: uppercase; letter-spacing: .03em; }
 .storico-riga strong { text-transform: uppercase; letter-spacing: .02em; font-size: .92rem; }
 .storico-data { color: var(--muto); font-size: .76rem; }
 .storico-riga ul { margin-top: 10px; font-size: .85rem; color: var(--muto); }
+
+/* ============================================================
+   LIVELLO PRO — hero, banner, prontezza, RPE, statistiche
+   ============================================================ */
+
+/* hero della settimana: strisce diagonali + colore della fase */
+.hero {
+  position: relative;
+  background:
+    repeating-linear-gradient(-55deg, transparent 0 14px, rgba(255, 255, 255, .025) 14px 28px),
+    linear-gradient(135deg, var(--carta2), var(--carta));
+  border: 1px solid var(--bordo);
+  border-left: 5px solid var(--fase);
+  border-radius: var(--raggio);
+  padding: 16px 16px 18px;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.hero-riga { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+.hero-eyebrow {
+  font-size: .72rem; font-weight: 700; color: var(--muto);
+  text-transform: uppercase; letter-spacing: .1em;
+}
+.hero-titolo {
+  font-size: 1.7rem; font-weight: 900; font-style: italic;
+  text-transform: uppercase; letter-spacing: .03em;
+  font-stretch: condensed;
+  line-height: 1.1;
+}
+
+/* banner intelligenti */
+.banner {
+  border: 1px solid var(--bordo);
+  border-radius: var(--raggio);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  font-size: .86rem;
+  background: var(--carta);
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+}
+.banner .btn-azione { margin-left: auto; }
+.banner-giallo { border-left: 4px solid var(--giallo); }
+.banner-rosso { border-left: 4px solid var(--rosso); }
+.banner-info { border-left: 4px solid var(--azzurro); }
+
+/* check di prontezza mattutino */
+.card-prontezza {
+  background: var(--carta);
+  border: 1px solid var(--bordo);
+  border-left: 5px solid var(--accento);
+  border-radius: var(--raggio);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.card-prontezza h3 { font-weight: 800; margin-bottom: 2px; }
+.sub-prontezza { color: var(--muto); font-size: .8rem; margin-bottom: 12px; }
+.prontezza-riga { margin: 10px 0; }
+.prontezza-riga > span { display: block; font-size: .88rem; font-weight: 600; margin-bottom: 6px; }
+.prontezza-opzioni { display: flex; gap: 8px; }
+.prontezza-opzioni .chip-btn { flex: 1; text-align: center; }
+
+/* voto di fatica RPE */
+.rpe-box { margin-top: 12px; border-top: 1px dashed var(--bordo); padding-top: 10px; }
+.rpe-box p { font-size: .82rem; color: var(--muto); margin-bottom: 8px; }
+.rpe-riga { display: flex; flex-wrap: wrap; gap: 6px; }
+.rpe-btn {
+  width: 40px; height: 40px; border-radius: 8px;
+  border: 1px solid var(--bordo); background: var(--carta2);
+  font-weight: 800; font-size: .95rem;
+}
+.rpe-btn:active { border-color: var(--accento); color: var(--accento); }
+.rpe-fatta { margin-top: 10px; font-size: .85rem; color: var(--muto); }
+
+/* statistiche di costanza */
+.stat-riga { display: flex; gap: 10px; margin-bottom: 8px; }
+.stat {
+  flex: 1; text-align: center;
+  background: var(--carta2);
+  border: 1px solid var(--bordo);
+  border-radius: 8px;
+  padding: 12px 6px;
+}
+.stat strong { display: block; font-size: 1.5rem; font-weight: 900; font-style: italic; }
+.stat span { font-size: .64rem; color: var(--muto); text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
+
+/* note tecniche personali */
+.es-nota {
+  font-size: .82rem; color: var(--teal);
+  background: rgba(45, 212, 191, .06);
+  border-left: 3px solid var(--teal);
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin: 8px 0 2px;
+}
+.es-piede-btn { display: inline-flex; gap: 6px; }
+
+/* dati partita e timer regolabile */
+.partita-dati { border-top: 1px dashed var(--bordo); margin-top: 14px; padding-top: 10px; }
+.partita-dati > p { color: var(--muto); font-size: .82rem; margin-bottom: 6px; }
+.select-corto { width: auto; min-width: 130px; }
+.timer-aggiusta { display: flex; gap: 8px; justify-content: center; width: 100%; margin-top: 10px; }
+
+/* rifiniture di carattere */
+.btn-primario {
+  background: linear-gradient(180deg, var(--accento), #1fb757);
+  box-shadow: 0 4px 16px rgba(47, 224, 111, .18);
+}
+.card-giorno { background: linear-gradient(180deg, var(--carta), #10141b); }
+.card-giorno, .card-prep, .pannello, .card-prontezza, .hero, .banner { animation: comparsa .18s ease; }
+@keyframes comparsa {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+.nav-btn.attivo span { filter: drop-shadow(0 0 8px var(--accento)); }
+#fase-badge { border-width: 2px; }
 
 @media (min-width: 700px) {
   #testata { padding: 14px 24px; }

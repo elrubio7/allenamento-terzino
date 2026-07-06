@@ -100,6 +100,13 @@ const T = {
     T.tab.accumulato = 0;           /* il preset scelto riparte pulito, anche dopo una pausa */
     T.render();
   },
+  /* conto alla rovescia personalizzato: ±15" / ±1' */
+  aggiustaDurata(delta) {
+    if (T.tab.inCorsa) return;
+    T.tab.durata = Math.min(5940, Math.max(5, T.tab.durata + delta));
+    T.tab.accumulato = 0;
+    T.render();
+  },
 
   tabStartPause() {
     const t = T.tab;

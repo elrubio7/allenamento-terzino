@@ -133,12 +133,51 @@
         }
         break;
       case 'completa': UI.completaSeduta(); break;
-      case 'partita-giocata':
-        E.segnaPartitaGiocata(iso);
+      case 'partita-giocata': {
+        const min = parseInt((U.$('#minuti-partita') || {}).value, 10);
+        const rpe = parseInt((U.$('#rpe-partita') || {}).value, 10);
+        E.segnaPartitaGiocata(iso, isNaN(min) ? null : min, isNaN(rpe) ? null : rpe);
         UI.renderSeduta();
-        UI.toast('Partita registrata. Domani si recupera.');
+        UI.toast('Partita registrata' + (min ? ' (' + min + '\')' : '') + '. Domani si recupera.');
         break;
+      }
       case 'salva-test': UI.salvaTest(iso, el.dataset.test); break;
+
+      /* prontezza mattutina */
+      case 'prontezza':
+        UI.prontezzaSel[el.dataset.q] = Number(el.dataset.v);
+        UI.render();
+        break;
+      case 'prontezza-ok': UI.confermaProntezza(); break;
+      case 'diventa-recupero': {
+        const g = S.data.settimana.giorni[iso];
+        g.tipo = 'recupero'; g.spunte = {}; g.pioggia = false;
+        S.save();
+        UI.renderSeduta();
+        UI.toast('Fatto: oggi recupero. Il corpo ringrazia, i numeri torneranno.');
+        break;
+      }
+
+      /* fatica di fine seduta (RPE) */
+      case 'rpe':
+        E.setRPE(iso, Number(el.dataset.val));
+        UI.renderSeduta();
+        UI.toast('Fatica registrata: alimenta il guardiano del carico settimanale.');
+        break;
+
+      /* nota tecnica personale */
+      case 'nota': {
+        const id = el.dataset.ex;
+        const attuale = S.data.note[id] || '';
+        const nuova = prompt('La tua nota tecnica per: ' + el.dataset.nome + '\n(lascia vuoto per cancellarla)', attuale);
+        if (nuova !== null) {
+          if (nuova.trim()) S.data.note[id] = nuova.trim();
+          else delete S.data.note[id];
+          S.save();
+          UI.renderSeduta();
+        }
+        break;
+      }
 
       /* prep / six pack */
       case 'prep-tipo': UI.prepTipo = el.dataset.tipo; UI.render(); break;
@@ -147,6 +186,7 @@
       /* timer */
       case 'timer-modo': T.setModo(el.dataset.modo); break;
       case 'timer-preset': T.setDurata(Number(el.dataset.sec)); break;
+      case 'timer-aggiusta': T.aggiustaDurata(Number(el.dataset.delta)); break;
       case 'timer-startpause': T.tabStartPause(); break;
       case 'timer-reset': T.tabReset(); break;
       case 'pillola-salta': T.skipRest(); break;

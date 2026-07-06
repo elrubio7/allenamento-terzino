@@ -14,7 +14,10 @@
    ============================================================ */
 const DB = {};
 
-DB.BUILD = '1.3.1';
+DB.BUILD = '1.4.0';
+
+/* durata tipica delle sedute in minuti (per il calcolo del carico RPE×minuti) */
+DB.DURATE = { forza: 60, alta: 60, velocita: 50, resistenza: 45, attivazione: 25, recupero: 30 };
 
 DB.CAPS = { bilanciere: 72, gilet: 24, manubrio: 8 };
 DB.PESO_BILANCIERE = 6;          // sia classico che EZ
@@ -60,7 +63,7 @@ DB.ROTAZIONI = {
   spalle:     ['military_press', 'landmine_press'],
   braccia:    ['curl_ez', 'french_press'],
   unilaterale:['bulgaro', 'step_up'],
-  adduttori:  ['copenhagen', 'landmine_rotation'],
+  adduttori:  ['copenhagen', 'nordic_curl', 'landmine_rotation'],
   kettlebell: ['kb_swing', 'kb_stacco_monogamba'],
   core_base:  ['ab_roller', 'alzate_ginocchia'],
   trazioni:   ['trazioni_prona', 'trazioni_supina', 'trazioni_neutra'],
@@ -160,6 +163,25 @@ DB.ESERCIZI = {
       'Ruota il busto portando il bilanciere in arco verso un fianco, ruotando anche il piede.',
       'Torna al centro controllando, poi ruota dall\'altro lato.',
       'Le braccia restano tese: la rotazione parte dal core, non dalle spalle.',
+    ],
+  },
+  nordic_curl: {
+    nome: 'Nordic curl (eccentrico)', tipoCarico: 'corpo', rotazione: 'adduttori',
+    recupero: 90,
+    livelli: [
+      { label: '3×4 solo discesa, più lenta che puoi', schema: { serie: 3, reps: 4, label: '3×4 negativi' } },
+      { label: '3×5 solo discesa', schema: { serie: 3, reps: 5, label: '3×5 negativi' } },
+      { label: '3×6 solo discesa', schema: { serie: 3, reps: 6, label: '3×6 negativi' } },
+      { label: '3×8 solo discesa', schema: { serie: 3, reps: 8, label: '3×8 negativi' } },
+      { label: '3×5 discesa lenta + risalita aiutandoti con le mani', schema: { serie: 3, reps: 5, label: '3×5 con risalita' } },
+      { label: '3×8 discesa lenta + risalita con le mani', schema: { serie: 3, reps: 8, label: '3×8 con risalita' } },
+    ],
+    esecuzione: [
+      'In ginocchio su un tappetino, caviglie bloccate sotto la base della power tower (o falle tenere a qualcuno).',
+      'Corpo in linea retta dalle ginocchia alla testa, mani pronte davanti al petto.',
+      'Scendi in avanti PIÙ LENTAMENTE CHE PUOI, frenando con i femorali.',
+      'Quando non tieni più, attutisci con le mani a terra come in un piegamento.',
+      'Torna su aiutandoti con una spinta delle braccia e riparti.',
     ],
   },
   kb_swing: {
@@ -527,6 +549,10 @@ DB.DETTAGLI = {
   landmine_rotation: {
     perche: 'Il core che ruota con forza: cross più potenti, tiri più forti, contrasti più solidi.',
     errori: 'Ruotare con le braccia che si piegano: il movimento parte dai fianchi, le braccia restano tese.',
+  },
+  nordic_curl: {
+    perche: 'L\'esercizio anti-stiramento per eccellenza: negli studi dimezza gli infortuni ai femorali. Per chi sprinta è oro puro.',
+    errori: 'Piegarsi sulle anche (il corpo deve restare in linea) e scendere veloci: tutta la magia è nella lentezza.',
   },
   kb_swing: {
     perche: 'Potenza pura della catena posteriore: l\'esplosione d\'anca che ti stacca dall\'avversario sul primo passo.',

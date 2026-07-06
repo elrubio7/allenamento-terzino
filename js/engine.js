@@ -85,10 +85,65 @@ E.valoreRitmo = function (prog, liv) {
   return prog.base + prog.step * liv;
 };
 
+/* ---------- prontezza (check mattutino) ---------- */
+E.setProntezza = function (iso, punti) {
+  const livello = punti >= 10 ? 'verde' : (punti >= 7 ? 'giallo' : 'rosso');
+  S.data.prontezza[iso] = { punti, livello };
+  S.save();
+  return livello;
+};
+E.prontezzaDi = function (iso) { return S.data.prontezza[iso] || null; };
+
+/* ---------- carico di allenamento (RPE × minuti) ---------- */
+E.setRPE = function (dataIso, rpe) {
+  const entry = S.data.storico.find(s => s.data === dataIso);
+  if (entry) { entry.rpe = rpe; S.save(); }
+};
+E.caricoSeduta = function (s) {
+  if (!s.rpe) return 0;
+  const minuti = s.tipo === 'partita' ? (s.minuti || 90) : (DB.DURATE[s.tipo] || 45);
+  return s.rpe * minuti;
+};
+E.caricoFinestra = function (finoIso, giorni) {
+  let tot = 0;
+  for (const s of S.data.storico) {
+    const d = U.diffDays(s.data, finoIso);
+    if (d >= 0 && d < giorni) tot += E.caricoSeduta(s);
+  }
+  return tot;
+};
+/* guardiano del carico: settimana corrente vs media delle ultime 4 */
+E.allarmeCarico = function () {
+  const oggi = U.todayISO();
+  const acuto = E.caricoFinestra(oggi, 7);
+  const cronico = E.caricoFinestra(oggi, 28) / 4;
+  if (cronico < 400) return null; /* servono almeno un paio di settimane di dati */
+  const rapporto = acuto / cronico;
+  if (rapporto > 1.4) return { livello: 'alto', msg: '⚠ Stai caricando il ' + Math.round((rapporto - 1) * 100) + '% più della tua media mensile: rischio infortuni alto. Alleggerisci la settimana.' };
+  if (rapporto > 1.25) return { livello: 'medio', msg: 'Carico in salita rapida (+' + Math.round((rapporto - 1) * 100) + '% sulla media): ascolta le sensazioni, niente strappi.' };
+  return null;
+};
+
+/* ---------- statistiche di costanza ---------- */
+E.statistiche = function () {
+  const oggi = U.todayISO();
+  const sedute = S.data.storico.filter(s => s.tipo !== 'partita');
+  const ultimi28 = sedute.filter(s => U.diffDays(s.data, oggi) >= 0 && U.diffDays(s.data, oggi) < 28).length;
+  /* settimane consecutive con almeno 3 sedute (a ritroso dalla settimana scorsa) */
+  let streak = 0;
+  let lun = U.mondayOf(oggi);
+  const inSettimana = l => sedute.filter(s => s.data >= l && s.data <= U.addDays(l, 6)).length;
+  if (inSettimana(lun) >= 3) streak++;
+  lun = U.addDays(lun, -7);
+  while (inSettimana(lun) >= 3) { streak++; lun = U.addDays(lun, -7); }
+  return { totali: sedute.length, ultimi28, streak };
+};
+
 /* ---------- fasi ---------- */
 E.faseEffettiva = function () {
   const set = S.data.settimana;
   if (set && set.tipo === 'costruzione') return { chiave: 'ipertrofia', congelata: true };
+  if (set && set.tipo === 'scarico') return { chiave: 'ipertrofia', congelata: true, scarico: true };
   return { chiave: S.data.fase.nome, congelata: false };
 };
 E.infoFase = function () {
@@ -179,14 +234,18 @@ E.risolviSeduta = function (iso) {
     iso, tipo: g.tipo, stato: g.stato, pioggia: !!g.pioggia,
     test: g.test || null, testFatto: g.testFatto || null,
     nome: meta.nome, icona: meta.icona, luogo: meta.luogo,
-    fase: eff.chiave, faseNome: eff.congelata ? 'Base (costruzione)' : DB.FASI[eff.chiave].nome,
-    faseColore: DB.FASI[eff.chiave].colore,
+    fase: eff.chiave,
+    faseNome: eff.scarico ? 'Scarico' : (eff.congelata ? 'Base (costruzione)' : DB.FASI[eff.chiave].nome),
+    faseColore: eff.scarico ? '#8b95a7' : DB.FASI[eff.chiave].colore,
     spunte: g.spunte || {}, risultato: g.risultato || null,
     kickoff: g.kickoff || null,
     esercizi: [], blocchi: null, corsaId: null, corsaNome: null, progressioneCorsa: null,
   };
+  vm.scarico = !!eff.scarico;
+  const pront = E.prontezzaDi(iso);
+  vm.prontezza = pront ? pront.livello : null;
 
-  if (g.tipo === 'partita') { vm.partita = true; return vm; }
+  if (g.tipo === 'partita') { vm.partita = true; vm.minuti = g.minuti || null; return vm; }
 
   if (g.tipo === 'velocita' || g.tipo === 'resistenza') {
     const lavoro = g.pioggia ? DB.CORSA_PIOGGIA[g.tipo] : DB.CORSA[g.tipo][eff.chiave];
@@ -207,6 +266,21 @@ E.risolviSeduta = function (iso) {
   }
 
   vm.esercizi = meta.slots.map(sl => E.risolviSlot(sl, iso, eff.chiave));
+
+  /* scarico (−15%) e giornata gialla/rossa (−10%): carichi ridotti, progressione ferma */
+  let riduzione = 1;
+  if (vm.scarico) riduzione *= 0.85;
+  if (vm.prontezza === 'giallo' || vm.prontezza === 'rosso') riduzione *= 0.9;
+  if (riduzione < 1) {
+    for (const e of vm.esercizi) {
+      if (e.carico != null && e.carico > 0) {
+        const def = DB.ESERCIZI[e.exId];
+        e.carico = E.caricoValido(e.tipoCarico, e.carico * riduzione);
+        if (def.cap != null && e.carico > def.cap) e.carico = def.cap;
+        e.dettaglio = E.dettaglioCarico(def, e.carico);
+      }
+    }
+  }
   return vm;
 };
 
@@ -358,6 +432,7 @@ E.generaSettimana = function (tipo, partite, lun, comeProssima) {
   delete S.data._correzione;
 
   const set = { inizio: lun, tipo, partite, giorni, creata: oggi };
+  if (tipo === 'scarico') S.data.ultimoScarico = lun;
   if (comeProssima) S.data.prossima = set;
   else { S.data.settimana = set; E.assegnaTestInSettimana(); }
   S.save();
@@ -429,6 +504,17 @@ E.completaSeduta = function (iso) {
   const migliorie = [];
   const dettagli = [];
 
+  /* giornata gialla/rossa o settimana di scarico: si mantiene, non si progredisce */
+  const mantenere = vm.scarico || vm.prontezza === 'giallo' || vm.prontezza === 'rosso';
+  if (mantenere && g.tipo !== 'recupero' && g.tipo !== 'attivazione') {
+    migliorie.push({
+      nome: vm.scarico ? 'SCARICO' : 'PRONTEZZA',
+      testo: vm.scarico
+        ? 'Settimana di scarico: seduta registrata senza aumenti. Stai ricaricando le batterie, è lavoro anche questo.'
+        : 'Giornata ' + vm.prontezza + ': carichi ridotti e nessun aumento oggi. Allenarsi ascoltandosi è da professionisti.',
+    });
+  }
+
   const serieComplete = (slotIdx, tot) => {
     const sp = (g.spunte && g.spunte[slotIdx]) || [];
     let n = 0;
@@ -448,7 +534,9 @@ E.completaSeduta = function (iso) {
     let tutte = true;
     vm.blocchi.forEach((b, i) => { if (!serieComplete(i, b.serie || 1).complete) tutte = false; });
     dettagli.push({ nome: vm.corsaNome, schema: tot + ' blocchi', carico: null, complete: tutte });
-    if (tutte) {
+    if (tutte && mantenere) {
+      /* giornata gialla o scarico: la seduta vale, la progressione aspetta */
+    } else if (tutte) {
       if (st.consolidamento) {
         st.consolidamento = false;
         migliorie.push({ nome: vm.corsaNome, testo: 'Consolidamento fatto: dalla prossima si riparte a salire.' });
@@ -482,6 +570,8 @@ E.completaSeduta = function (iso) {
         migliorie.push({ nome: ex.nome, testo: 'Progressione in pausa (fastidio segnalato). Guarisci prima, i numeri poi.' });
       } else if (!complete) {
         st.streak = 0;
+      } else if (mantenere) {
+        /* giornata gialla o scarico: nessun aumento oggi */
       } else if (st.consolidamento) {
         st.consolidamento = false;
         migliorie.push({ nome: ex.nome, testo: 'Consolidamento fatto: dalla prossima si torna a salire.' });
@@ -532,8 +622,9 @@ E.completaSeduta = function (iso) {
     nome: vm.nome + (vm.pioggia ? ' 🌧' : ''), fase: vm.faseNome, dettagli,
   });
 
-  /* avanzamento di fase: ogni 3 sedute di forza gambe (mai in costruzione) */
-  if (vm.tipo === 'forza' && set.tipo !== 'costruzione') {
+  /* avanzamento di fase: ogni 3 sedute di forza gambe piene
+     (mai in costruzione, scarico o giornate gialle) */
+  if (vm.tipo === 'forza' && set.tipo !== 'costruzione' && !mantenere) {
     S.data.fase.contatore++;
     if (S.data.fase.contatore >= DB.SEDUTE_PER_FASE) {
       S.data.fase.contatore = 0;
@@ -548,12 +639,43 @@ E.completaSeduta = function (iso) {
   return migliorie;
 };
 
-E.segnaPartitaGiocata = function (iso) {
+E.segnaPartitaGiocata = function (iso, minuti, rpe) {
   const g = S.data.settimana.giorni[iso];
   g.stato = 'fatta';
+  g.minuti = minuti || null;
   S.data.ultimaPartita = iso;
-  S.data.storico.unshift({ data: iso, completata: U.todayISO(), tipo: 'partita', nome: 'Partita ⚽', fase: '', dettagli: [] });
+  S.data.storico.unshift({
+    data: iso, completata: U.todayISO(), tipo: 'partita',
+    nome: 'Partita ⚽' + (minuti ? ' — ' + minuti + '\'' : ''),
+    fase: '', dettagli: [], minuti: minuti || null, rpe: rpe || null,
+  });
   S.save();
+};
+
+/* consiglio per il giorno dopo la partita, in base a minuti e durezza */
+E.consiglioPostPartita = function () {
+  const p = S.data.storico.find(s => s.tipo === 'partita');
+  if (!p || U.diffDays(p.data, U.todayISO()) !== 1 || !p.minuti) return null;
+  if (p.minuti >= 75 && (p.rpe || 0) >= 7) {
+    return 'Ieri ' + p.minuti + '\' tosti (fatica ' + p.rpe + '/10): recupero extra oggi — aggiungi 10\' di cyclette dolce e il giro completo di foam roller.';
+  }
+  if (p.minuti <= 30) {
+    return 'Ieri hai giocato solo ' + p.minuti + '\': gambe fresche. Se te la senti, oggi puoi trasformare il recupero in una seduta vera (usa 🔀 sposta).';
+  }
+  return null;
+};
+
+/* ---------- scarico: consigliato ogni ~4 settimane o dopo giorni no ---------- */
+E.serveScarico = function () {
+  const oggi = U.todayISO();
+  const riferimento = S.data.ultimoScarico || S.data.creato;
+  if (U.diffDays(riferimento, oggi) >= 28) return true;
+  /* oppure: 3+ check gialli/rossi negli ultimi 7 giorni */
+  let no = 0;
+  for (const [iso, p] of Object.entries(S.data.prontezza)) {
+    if (U.diffDays(iso, oggi) >= 0 && U.diffDays(iso, oggi) < 7 && p.livello !== 'verde') no++;
+  }
+  return no >= 3;
 };
 
 /* ============================================================

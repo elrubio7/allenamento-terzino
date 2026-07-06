@@ -41,6 +41,8 @@ const UI = {
     U.$('#fase-badge').innerHTML = f.icona + ' ' + U.esc(f.nome) +
       (f.congelata ? '' : ' <small>(' + f.mancanti + ' sedute forza al cambio)</small>');
     U.$('#fase-badge').style.borderColor = f.colore;
+    /* il colore della fase tinge l'app */
+    document.documentElement.style.setProperty('--fase', f.colore);
   },
 
   /* ============================================================
@@ -53,10 +55,45 @@ const UI = {
     const da = oggi > set.inizio ? oggi : set.inizio;
     const fine = U.sundayOf(set.inizio);
 
-    const nomiTipo = { una: '1 partita', due: '2 partite', costruzione: 'Costruzione' };
-    let html = '<div class="settimana-testata">' +
-      '<span class="settimana-tipo">🔒 Settimana: <strong>' + nomiTipo[set.tipo] + '</strong></span>' +
-      '<button class="link" data-action="correggi">ho sbagliato, correggi</button></div>';
+    const nomiTipo = { una: '1 partita', due: '2 partite', costruzione: 'Costruzione', scarico: 'Scarico' };
+
+    /* hero: conto alla rovescia alla partita */
+    const prossimePartite = (set.partite || []).filter(p => p >= oggi);
+    let titolone;
+    if (prossimePartite.length) {
+      const d = U.diffDays(oggi, prossimePartite[0]);
+      titolone = d === 0 ? 'OGGI SI GIOCA ⚽' : (d === 1 ? 'PARTITA DOMANI' : 'PARTITA TRA ' + d + ' GIORNI');
+    } else if (set.tipo === 'costruzione') titolone = 'SI COSTRUISCE 🧱';
+    else if (set.tipo === 'scarico') titolone = 'SI RICARICA 🪫';
+    else titolone = 'SETTIMANA IN CORSO';
+
+    let html = '<div class="hero">' +
+      '<div class="hero-riga"><span class="hero-eyebrow">🔒 ' + nomiTipo[set.tipo] + '</span>' +
+      '<button class="link" data-action="correggi">ho sbagliato, correggi</button></div>' +
+      '<div class="hero-titolo">' + titolone + '</div></div>';
+
+    /* guardiano del carico */
+    const allarme = E.allarmeCarico();
+    if (allarme) html += '<div class="banner banner-' + (allarme.livello === 'alto' ? 'rosso' : 'giallo') + '">' + U.esc(allarme.msg) + '</div>';
+
+    /* consiglio post-partita */
+    const consiglio = E.consiglioPostPartita();
+    if (consiglio) html += '<div class="banner banner-info">⚽ ' + U.esc(consiglio) + '</div>';
+
+    /* promemoria backup */
+    if (S.data.storico.length >= 5) {
+      const gg = S.data.ultimoBackup ? U.diffDays(S.data.ultimoBackup, oggi) : null;
+      if (gg === null || gg > 14) {
+        html += '<div class="banner banner-giallo">💾 ' + (gg === null ? 'Non hai ancora mai esportato un backup' : 'Ultimo backup: ' + gg + ' giorni fa') +
+          ' — i tuoi progressi vivono solo su questo telefono. <button class="link" data-action="tab" data-tab="dati">Vai a DATI</button></div>';
+      }
+    }
+
+    /* check di prontezza mattutino */
+    const gOggi = set.giorni[oggi];
+    if (gOggi && gOggi.stato === 'da_fare' && gOggi.tipo !== 'partita' && gOggi.tipo !== 'recupero' && !E.prontezzaDi(oggi)) {
+      html += UI.cardProntezza();
+    }
 
     let iso = da;
     while (iso <= fine) {
@@ -107,6 +144,10 @@ const UI = {
       { id: 'due', icona: '⚽⚽', nome: '2 partite', descr: 'Settimana congestionata: si gestisce, non si costruisce. Recuperi e attivazioni.' },
       { id: 'costruzione', icona: '🧱', nome: 'Costruzione', descr: 'Nessuna partita: si mette su lavoro. Due sedute di forza, tanta strada. Scade da sola lunedì.' },
     ];
+    /* scarico consigliato: ogni ~4 settimane di spinta o dopo troppi check gialli */
+    if (E.serveScarico()) {
+      opzioni.push({ id: 'scarico', icona: '🪫', nome: 'Scarico (consigliato)', descr: 'Spingi da più di 4 settimane o il corpo manda segnali: carichi ridotti del 15%, progressione in pausa. Si ricarica per ripartire più forti.' });
+    }
     let html = '<div class="pannello">' +
       (perProssima
         ? '<h2>Domenica: che settimana sarà la prossima?</h2><p class="pannello-sub">Vale per la settimana che inizia domani, lunedì ' + U.fmtDataBreve(U.addDays(U.mondayOf(U.todayISO()), 7)) + '.</p>'
@@ -120,7 +161,7 @@ const UI = {
       U.GIORNI.forEach((gg, i) => { s += '<option value="' + i + '" ' + (i === val ? 'selected' : '') + '>' + gg + '</option>'; });
       return s + '</select>';
     };
-    if (sel.tipo === 'una') {
+    if (sel.tipo === 'una' || sel.tipo === 'scarico') {
       html += '<div class="pannello-giorni"><label>Giorno della partita</label>' + giorniSel('giorno1', sel.g1) + '</div>';
     } else if (sel.tipo === 'due') {
       html += '<div class="pannello-giorni"><label>Prima partita</label>' + giorniSel('giorno2', sel.g2) +
@@ -139,7 +180,7 @@ const UI = {
       ? U.addDays(U.mondayOf(U.todayISO()), 7)
       : U.mondayOf(U.todayISO());
     let partite = [];
-    if (sel.tipo === 'una') {
+    if (sel.tipo === 'una' || sel.tipo === 'scarico') {
       const s1 = U.$('#giorno1'); if (s1) sel.g1 = Number(s1.value);
       partite = [U.addDays(lun, sel.g1)];
     } else if (sel.tipo === 'due') {
@@ -153,6 +194,40 @@ const UI = {
     UI.scelta.tipo = null;
     UI.render();
     UI.toast(perProssima ? 'Prossima settimana pronta: parte da sola domani. 🔒' : 'Settimana pronta. Si comincia! 💪');
+  },
+
+  /* ============================================================
+     PRONTEZZA — check mattutino (30 secondi)
+     ============================================================ */
+  prontezzaSel: {},
+  cardProntezza() {
+    const sel = UI.prontezzaSel;
+    const domande = [['sonno', '😴 Come hai dormito?'], ['muscoli', '💪 Dolori muscolari?'], ['energia', '⚡ Quanta energia hai?'], ['umore', '🙂 Umore?']];
+    const opzioni = [[1, 'Male'], [2, 'Così così'], [3, 'Bene']];
+    let html = '<div class="card-prontezza"><h3>Come stai stamattina?</h3>' +
+      '<p class="sub-prontezza">30 secondi: la seduta di oggi si adatta a come sta il tuo corpo.</p>';
+    for (const [id, label] of domande) {
+      html += '<div class="prontezza-riga"><span>' + label + '</span><div class="prontezza-opzioni">';
+      for (const [v, txt] of opzioni) {
+        html += '<button class="chip-btn ' + (sel[id] === v ? 'attivo' : '') + '" data-action="prontezza" data-q="' + id + '" data-v="' + v + '">' + txt + '</button>';
+      }
+      html += '</div></div>';
+    }
+    const pronte = Object.keys(sel).length === 4;
+    html += '<button class="btn-primario" data-action="prontezza-ok" ' + (pronte ? '' : 'disabled') + '>Fatto ✓</button></div>';
+    return html;
+  },
+
+  confermaProntezza() {
+    const sel = UI.prontezzaSel;
+    if (Object.keys(sel).length < 4) return;
+    const punti = sel.sonno + sel.muscoli + sel.energia + sel.umore;
+    const livello = E.setProntezza(U.todayISO(), punti);
+    UI.prontezzaSel = {};
+    UI.render();
+    if (livello === 'verde') UI.toast('🟢 Semaforo verde: si spinge come da programma!');
+    else if (livello === 'giallo') UI.toast('🟡 Giornata gialla: carichi ridotti del 10% e niente aumenti oggi. Qualità, non eroismi.');
+    else UI.toast('🔴 Giornata rossa: il corpo chiede tregua. Apri la seduta: puoi trasformarla in recupero con un tocco.');
   },
 
   /* ============================================================
@@ -198,11 +273,25 @@ const UI = {
       if (UI.swapInCorso) html += UI.swapScelta(iso);
     }
 
+    /* banner scarico / prontezza */
+    if (vm.stato === 'da_fare' && vm.tipo !== 'recupero' && vm.tipo !== 'attivazione') {
+      if (vm.scarico) {
+        html += '<div class="banner banner-info">🪫 Settimana di scarico: carichi ridotti del 15%, progressione in pausa. Muoviti bene, esci fresco.</div>';
+      }
+      if (vm.prontezza === 'giallo') {
+        html += '<div class="banner banner-giallo">🟡 Giornata gialla: carichi già ridotti del 10%, oggi nessun aumento. Se un esercizio pesa troppo, taglia una serie senza rimorsi.</div>';
+      } else if (vm.prontezza === 'rosso') {
+        html += '<div class="banner banner-rosso">🔴 Giornata rossa: il corpo chiede tregua. Il consiglio vero è non forzare.' +
+          '<button class="btn-azione" data-action="diventa-recupero">🌿 Trasforma in recupero</button></div>';
+      }
+    }
+
     if (vm.stato === 'fatta') {
       html += '<div class="seduta-congelata"><h3>✓ Seduta completata</h3>' +
         (vm.risultato && vm.risultato.length
           ? '<p>Cosa è migliorato:</p><ul>' + vm.risultato.map(m => '<li><strong>' + U.esc(m.nome) + '</strong>: ' + U.esc(m.testo) + '</li>').join('') + '</ul>'
-          : '<p>Registrata nello storico.</p>') + '</div>';
+          : '<p>Registrata nello storico.</p>') +
+        UI.bloccoRPE(iso) + '</div>';
     }
     if (vm.stato === 'saltata') html += '<div class="seduta-congelata"><h3>Seduta saltata</h3><p>Si riparte dalla prossima.</p></div>';
 
@@ -266,6 +355,18 @@ const UI = {
     box.innerHTML = html;
   },
 
+  /* voto di fatica a fine seduta: alimenta il guardiano del carico */
+  bloccoRPE(iso) {
+    const voce = S.data.storico.find(s => s.data === iso && s.tipo !== 'partita');
+    if (!voce) return '';
+    if (voce.rpe) return '<p class="rpe-fatta">Fatica registrata: <strong>' + voce.rpe + '/10</strong></p>';
+    let html = '<div class="rpe-box"><p>Quanto è stata dura? (1 = passeggiata, 10 = al limite)</p><div class="rpe-riga">';
+    for (let v = 1; v <= 10; v++) {
+      html += '<button class="rpe-btn" data-action="rpe" data-val="' + v + '">' + v + '</button>';
+    }
+    return html + '</div></div>';
+  },
+
   cardEsercizio(iso, ex, slot, spunte, bloccata) {
     let badges = '';
     if (ex.gruppo) {
@@ -314,9 +415,11 @@ const UI = {
       (ex.errori ? '<p class="es-errori">⚠️ Errori da evitare: ' + U.esc(ex.errori) + '</p>' : '') +
       '</details>' +
       serie +
-      '<div class="es-piede"><span>recupero ' + U.fmtMMSS(ex.recupero || 0) + '</span>' +
+      (S.data.note[ex.exId] ? '<p class="es-nota">📝 ' + U.esc(S.data.note[ex.exId]) + '</p>' : '') +
+      '<div class="es-piede"><span>recupero ' + U.fmtMMSS(ex.recupero || 0) + '</span><span class="es-piede-btn">' +
+      '<button class="btn-mini" data-action="nota" data-ex="' + ex.exId + '" data-nome="' + U.esc(ex.nome) + '">📝 nota</button>' +
       '<button class="btn-mini ' + (ex.fastidio ? 'attivo' : '') + '" data-action="fastidio" data-ex="' + ex.exId + '">' +
-      (ex.fastidio ? '✓ fastidio segnalato' : '⚠ ho un fastidio') + '</button></div></div>';
+      (ex.fastidio ? '✓ fastidio segnalato' : '⚠ ho un fastidio') + '</button></span></div></div>';
   },
 
   swapScelta(iso) {
@@ -358,8 +461,17 @@ const UI = {
       html += '<p class="nota-nutri">Grammature calcolate sul tuo peso (' + S.data.peso + ' kg — lo cambi nella scheda DATI). Solo pre-gara: i pasti principali restano i tuoi.</p></div>';
     }
 
-    if (g.stato === 'fatta') html += '<div class="seduta-congelata"><h3>✓ Partita giocata</h3><p>Domani: recupero.</p></div>';
-    else html += '<button class="btn-primario" data-action="partita-giocata">Partita giocata ✓</button>';
+    if (g.stato === 'fatta') {
+      html += '<div class="seduta-congelata"><h3>✓ Partita giocata' + (g.minuti ? ' — ' + g.minuti + '\'' : '') + '</h3><p>Domani: recupero' + (g.minuti >= 75 ? ' con i fiocchi' : '') + '.</p></div>';
+    } else {
+      const optMin = [90, 105, 120, 75, 60, 45, 30, 15, 0].map(m => '<option value="' + m + '">' + m + ' minuti</option>').join('');
+      let optRpe = '';
+      for (let v = 1; v <= 10; v++) optRpe += '<option value="' + v + '" ' + (v === 7 ? 'selected' : '') + '>' + v + '</option>';
+      html += '<div class="partita-dati"><p>A fine partita, prima di segnare "giocata":</p>' +
+        '<div class="kickoff-riga"><label>Minuti giocati</label><select id="minuti-partita" class="select-giorno select-corto">' + optMin + '</select></div>' +
+        '<div class="kickoff-riga"><label>Quanto è stata dura? (1-10)</label><select id="rpe-partita" class="select-giorno select-corto">' + optRpe + '</select></div></div>' +
+        '<button class="btn-primario" data-action="partita-giocata">Partita giocata ✓</button>';
+    }
     return html + '</div>';
   },
 
@@ -507,7 +619,10 @@ const UI = {
       '<div id="timer-presets" class="timer-presets">' +
       [30, 60, 90, 120, 180, 240].map(s =>
         '<button class="timer-preset ' + (T.tab.durata === s ? 'attivo' : '') + '" data-action="timer-preset" data-sec="' + s + '">' + U.fmtMMSS(s) + '</button>').join('') +
-      '</div>' +
+      '<div class="timer-aggiusta">' +
+      [[-60, '−1\''], [-15, '−15"'], [15, '+15"'], [60, '+1\'']].map(c =>
+        '<button class="btn-azione" data-action="timer-aggiusta" data-delta="' + c[0] + '">' + c[1] + '</button>').join('') +
+      '</div></div>' +
       '<div class="timer-controlli">' +
       '<button id="timer-startpause" class="btn-primario btn-timer" data-action="timer-startpause">VIA</button>' +
       '<button class="btn-azione" data-action="timer-reset">Azzera</button></div>' +
@@ -520,6 +635,19 @@ const UI = {
   progressiEx: 'squat',
   vistaProgressi() {
     let html = '<h2 class="titolo-tab">Progressi</h2>';
+
+    /* costanza e carico: la variabile che decide tutto */
+    const st = E.statistiche();
+    const oggi = U.todayISO();
+    const acuto = E.caricoFinestra(oggi, 7);
+    const cronico = Math.round(E.caricoFinestra(oggi, 28) / 4);
+    html += '<div class="card-prep"><h3>🔥 Costanza</h3><div class="stat-riga">' +
+      '<div class="stat"><strong>' + st.totali + '</strong><span>sedute totali</span></div>' +
+      '<div class="stat"><strong>' + st.ultimi28 + '</strong><span>ultimi 28 giorni</span></div>' +
+      '<div class="stat"><strong>' + st.streak + '</strong><span>settimane di fila (3+ sedute)</span></div>' +
+      '</div>' +
+      (cronico > 0 ? '<p class="nota-sixpack">Carico ultimi 7 giorni: <strong>' + acuto + '</strong> · media settimanale del mese: <strong>' + cronico + '</strong> (RPE × minuti — vota la fatica a fine seduta per tenerlo aggiornato)</p>' : '<p class="nota-sixpack">Vota la fatica (1-10) a fine seduta: l\'app calcola il carico settimanale e ti avvisa se stai accelerando troppo.</p>') +
+      '</div>';
 
     /* carichi */
     const conStoria = Object.keys(DB.ESERCIZI).filter(id => {
@@ -625,6 +753,8 @@ const UI = {
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    S.data.ultimoBackup = U.todayISO();
+    S.save();
     UI.toast('Backup esportato: salvalo in un posto sicuro (Drive, mail a te stesso...).');
   },
 };
