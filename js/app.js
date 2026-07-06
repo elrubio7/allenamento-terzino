@@ -12,6 +12,20 @@
     /* service worker per l'uso offline (non su file://) */
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('sw.js').catch(() => {});
+
+      /* quando arriva una versione nuova, l'app si ricarica da sola */
+      let ricaricato = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
+        if (ricaricato) return;
+        ricaricato = true;
+        location.reload();
+      });
+      /* e controlla se c'è una versione nuova ogni volta che riapri l'app */
+      document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) {
+          navigator.serviceWorker.getRegistration().then(reg => { if (reg) reg.update(); });
+        }
+      });
     }
   }
 
