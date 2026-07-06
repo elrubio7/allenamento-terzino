@@ -83,6 +83,19 @@
         break;
       }
       case 'avvia-recupero': T.startRest(Number(el.dataset.sec) || 60, 'Recupero'); break;
+      case 'carico-piu':
+      case 'carico-meno': {
+        const id = el.dataset.ex;
+        const def = DB.ESERCIZI[id];
+        const st = E.statoEx(id);
+        const delta = (a === 'carico-piu' ? 1 : -1) * def.inc;
+        let nuovo = E.caricoValido(def.tipoCarico, st.carico + delta);
+        if (def.cap != null && nuovo > def.cap) nuovo = def.cap;
+        st.carico = nuovo;
+        S.save();
+        UI.renderSeduta();
+        break;
+      }
       case 'fastidio': {
         const st = E.statoEx(el.dataset.ex);
         E.setFastidio(el.dataset.ex, !st.fastidio);

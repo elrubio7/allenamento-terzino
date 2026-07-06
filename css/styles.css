@@ -280,6 +280,15 @@ h2, h3 { text-transform: uppercase; letter-spacing: .03em; }
 .es-schema { color: var(--azzurro); font-weight: 800; font-size: 1.02rem; letter-spacing: .02em; }
 .es-carico { text-align: right; }
 .es-carico strong { font-size: 1.15rem; font-weight: 900; }
+.carico-edit { display: inline-flex; align-items: center; gap: 10px; }
+.btn-carico {
+  width: 32px; height: 32px; border-radius: 8px;
+  border: 1px solid var(--bordo); background: var(--carta2);
+  font-size: 1.15rem; font-weight: 800; line-height: 1;
+  color: var(--accento);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.btn-carico:active { border-color: var(--accento); }
 .es-dettaglio { color: var(--muto); font-size: .88rem; margin: 4px 0 8px; }
 .es-esecuzione summary, .dettagli-box summary {
   cursor: pointer; color: var(--muto); font-size: .82rem; padding: 5px 0;

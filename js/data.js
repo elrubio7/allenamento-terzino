@@ -14,7 +14,7 @@
    ============================================================ */
 const DB = {};
 
-DB.BUILD = '1.1.1';
+DB.BUILD = '1.2.0';
 
 DB.CAPS = { bilanciere: 72, gilet: 24, manubrio: 8 };
 DB.PESO_BILANCIERE = 6;          // sia classico che EZ
@@ -501,38 +501,37 @@ DB.CORE_PER_FASE = {
 };
 
 /* ---------- CORSA ----------
-   Lavori per fase. Ogni lavoro ha blocchi (spuntabili) e una progressione:
-   - tipo 'serie': aumentano le ripetizioni del blocco chiave
-   - tipo 'ritmo': il tempo target scende (in secondi)
-   La funzione blocchi(liv) restituisce i blocchi per il livello attuale.
-   Il riscaldamento di corsa sta in PREP: qui si parte già caldi.      */
+   Lavori per fase. Ogni blocco ha le sue SERIE spuntabili (come i pesi):
+   a ogni spunta parte da solo il recupero del blocco.
+   Progressione: 'serie' = più ripetizioni; 'ritmo' = tempo target che scende.
+   Il riscaldamento vive nel box Riscaldamento della seduta: qui solo lavoro. */
 DB.CORSA = {
   velocita: {
     ipertrofia: {
       id: 'vel_base', nome: 'Velocità — base (costruisci il motore)',
       prog: { tipo: 'serie', base: 5, step: 1, max: 10, cosa: 'accelerazioni' },
       blocchi: liv => [
-        { titolo: 'Scaletta agilità', dettaglio: '4 schemi × 2 giri (skip, doppio appoggio, laterale, dentro-fuori)', recupero: 45 },
-        { titolo: 'Accelerazioni progressive', dettaglio: (5 + liv) + ' × 60 m: parti piano e arriva al 90% negli ultimi 20 m. Recupero 2\' camminando', recupero: 120 },
-        { titolo: 'Allunghi', dettaglio: '3 × 80 m al 75-80%, sciolti e ampi. Recupero 90"', recupero: 90 },
+        { titolo: 'Scaletta agilità', serie: 2, dettaglio: 'Un giro dei 4 schemi a serie: skip, doppio appoggio, laterale, dentro-fuori', recupero: 45 },
+        { titolo: 'Accelerazioni progressive', serie: 5 + liv, dettaglio: '60 m l\'una: parti piano e arriva al 90% negli ultimi 20 m', recupero: 120 },
+        { titolo: 'Allunghi', serie: 3, dettaglio: '80 m al 75-80%, sciolti e ampi', recupero: 90 },
       ],
     },
     forza: {
       id: 'vel_forza', nome: 'Velocità — sprint massimali',
       prog: { tipo: 'serie', base: 5, step: 1, max: 10, cosa: 'sprint col paracadute' },
       blocchi: liv => [
-        { titolo: 'Scaletta rapida', dettaglio: '3 schemi × 2 giri alla massima frequenza di appoggi', recupero: 45 },
-        { titolo: 'Sprint con paracadute', dettaglio: (5 + liv) + ' × 30 m al 100% con paracadute. Recupero 3\' completo (la qualità vale più della quantità)', recupero: 180 },
-        { titolo: 'Partenze varie', dettaglio: '4 × 20 m senza paracadute: partenza in piedi, seduto, prono, dopo giro su te stesso', recupero: 120 },
+        { titolo: 'Scaletta rapida', serie: 2, dettaglio: 'Un giro dei 3 schemi a serie, alla massima frequenza di appoggi', recupero: 45 },
+        { titolo: 'Sprint con paracadute', serie: 5 + liv, dettaglio: '30 m al 100% con paracadute. La qualità vale più della quantità: recupero completo', recupero: 180 },
+        { titolo: 'Partenze varie', serie: 4, dettaglio: '20 m senza paracadute: partenza in piedi, seduto, prono, dopo giro su te stesso', recupero: 120 },
       ],
     },
     potenza: {
       id: 'vel_potenza', nome: 'Velocità — RSA (sprint ripetuti da gara)',
       prog: { tipo: 'serie', base: 6, step: 1, max: 10, cosa: 'sprint per blocco' },
       blocchi: liv => [
-        { titolo: 'RSA — blocco 1', dettaglio: (6 + liv) + ' × 40 m al massimo, recupero 20" tra gli sprint (torna camminando veloce)', recupero: 240 },
-        { titolo: 'RSA — blocco 2', dettaglio: (6 + liv) + ' × 40 m come sopra, dopo 4\' di recupero dal blocco 1', recupero: 240 },
-        { titolo: 'Navette con i coni', dettaglio: '4 × (10+20+10 m) con cambi di senso sui coni. Recupero 90"', recupero: 90 },
+        { titolo: 'RSA — blocco 1', serie: 6 + liv, dettaglio: '40 m al massimo, poi torna camminando veloce: hai solo 20" tra gli sprint', recupero: 20 },
+        { titolo: 'RSA — blocco 2', serie: 6 + liv, dettaglio: 'Come il blocco 1, dopo 4\' di recupero completo', recupero: 20 },
+        { titolo: 'Navette con i coni', serie: 4, dettaglio: '10+20+10 m con cambi di senso sui coni', recupero: 90 },
       ],
     },
   },
@@ -541,47 +540,47 @@ DB.CORSA = {
       id: 'res_base', nome: 'Resistenza — ripetute tempo',
       prog: { tipo: 'ritmo', base: 115, step: -2, min: 85, unita: 'per 400 m' },
       blocchi: (liv, ritmo) => [
-        { titolo: 'Ripetute 400 m', dettaglio: '5 × 400 m in ' + U.fmtRitmo(ritmo) + ' l\'una. Recupero 90" da fermo o camminando. (Il riscaldamento di corsa lo trovi in PREP: fallo prima, qui si parte già caldi)', recupero: 90 },
-        { titolo: 'Defaticamento', dettaglio: '5\' di corsa blanda + camminata', recupero: 0 },
+        { titolo: 'Ripetute 400 m', serie: 5, dettaglio: '400 m in ' + U.fmtRitmo(ritmo) + ' l\'uno: spunta a ogni ripetuta, il timer ti dà i 90" di recupero', recupero: 90 },
+        { titolo: 'Defaticamento', serie: 1, dettaglio: '5\' di corsa blanda + camminata', recupero: 0 },
       ],
     },
     forza: {
       id: 'res_forza', nome: 'Resistenza — fartlek (cambi di ritmo)',
       prog: { tipo: 'serie', base: 8, step: 1, max: 14, cosa: 'cambi di ritmo' },
       blocchi: liv => [
-        { titolo: 'Fartlek', dettaglio: (8 + liv) + ' × (30" forte al 85-90% / 90" piano). Il tratto forte è deciso ma controllato. Parti già caldo (riscaldamento in PREP)', recupero: 0 },
-        { titolo: 'Defaticamento', dettaglio: '5\' blandi', recupero: 0 },
+        { titolo: 'Fartlek', serie: 8 + liv, dettaglio: '30" forte al 85-90%, deciso ma controllato: spunta a ogni tratto forte, il timer ti dà i 90" piano', recupero: 90 },
+        { titolo: 'Defaticamento', serie: 1, dettaglio: '5\' blandi', recupero: 0 },
       ],
     },
     potenza: {
       id: 'res_potenza', nome: 'Resistenza — intermittente 15-15',
       prog: { tipo: 'ritmo', base: 58, step: 2, max: 80, unita: 'm ogni 15"', crescente: true },
       blocchi: (liv, dist) => [
-        { titolo: '15-15 — blocco 1', dettaglio: '8\' di: 15" di corsa coprendo ' + dist + ' m / 15" fermo o camminando. Usa i coni per misurare la distanza. Parti già caldo (riscaldamento in PREP)', recupero: 180 },
-        { titolo: '15-15 — blocco 2', dettaglio: '8\' come sopra, dopo 3\' di recupero', recupero: 0 },
+        { titolo: '15-15 — blocco 1', serie: 1, dettaglio: '8\' di: 15" di corsa coprendo ' + dist + ' m / 15" fermo o camminando. Usa i coni per misurare la distanza', recupero: 180 },
+        { titolo: '15-15 — blocco 2', serie: 1, dettaglio: '8\' come il blocco 1, dopo 3\' di recupero', recupero: 0 },
       ],
     },
   },
 };
 
-/* Versione pioggia 🌧 (garage): sostituisce la seduta di strada */
+/* Versione pioggia 🌧 (garage): sostituisce la seduta di strada.
+   Il riscaldamento da garage sta in DB.RISCALDAMENTI.pioggia. */
 DB.CORSA_PIOGGIA = {
   velocita: {
     id: 'vel_pioggia', nome: 'Velocità — versione garage 🌧',
     prog: { tipo: 'serie', base: 10, step: 1, max: 16, cosa: 'sprint in cyclette' },
     blocchi: liv => [
-      { titolo: 'Scaletta al coperto', dettaglio: '4 schemi × 2 giri (l\'eccezione consentita: la scaletta entra in garage)', recupero: 45 },
-      { titolo: 'Sprint in cyclette', dettaglio: (10 + liv) + ' × 15" alla massima cadenza, resistenza 7-8. Recupero 45" pedalando piano', recupero: 45 },
-      { titolo: 'Skip alto sul posto', dettaglio: '3 × 20" alla massima frequenza. Recupero 60"', recupero: 60 },
+      { titolo: 'Scaletta al coperto', serie: 2, dettaglio: 'Un giro dei 4 schemi a serie (l\'eccezione consentita: la scaletta entra in garage)', recupero: 45 },
+      { titolo: 'Sprint in cyclette', serie: 10 + liv, dettaglio: '15" alla massima cadenza, resistenza 7-8, poi il timer ti dà i 45" pedalando piano', recupero: 45 },
+      { titolo: 'Skip alto sul posto', serie: 3, dettaglio: '20" alla massima frequenza', recupero: 60 },
     ],
   },
   resistenza: {
     id: 'res_pioggia', nome: 'Resistenza — versione garage 🌧',
     prog: { tipo: 'serie', base: 6, step: 1, max: 12, cosa: 'ripetute in cyclette' },
     blocchi: liv => [
-      { titolo: 'Cyclette progressiva', dettaglio: '10\' partendo da resistenza 3 e salendo a 5', recupero: 0 },
-      { titolo: 'Ripetute in cyclette', dettaglio: (6 + liv) + ' × (1\' forte a resistenza 7 / 2\' piano a resistenza 3)', recupero: 0 },
-      { titolo: 'Circuito corpo libero', dettaglio: '2 giri: 15 squat + 10 affondi per gamba + 30" plank, senza pausa tra gli esercizi', recupero: 90 },
+      { titolo: 'Ripetute in cyclette', serie: 6 + liv, dettaglio: '1\' forte a resistenza 7: spunta a ogni ripetuta, il timer ti dà i 2\' piano a resistenza 3', recupero: 120 },
+      { titolo: 'Circuito corpo libero', serie: 2, dettaglio: 'Un giro a serie: 15 squat + 10 affondi per gamba + 30" plank, senza pausa dentro il giro', recupero: 90 },
     ],
   },
 };
@@ -643,6 +642,15 @@ DB.RISCALDAMENTI = {
     voci: [
       'Nessun riscaldamento necessario: la seduta è tutta a bassa intensità',
       'Inizia direttamente con la cyclette dolce',
+    ],
+  },
+  pioggia: {
+    nome: 'Riscaldamento giorno di pioggia (garage)',
+    voci: [
+      'Cyclette 8\' partendo da resistenza 3 e salendo a 5',
+      'Mobilità dinamica di anche e caviglie: 10 movimenti per articolazione',
+      'Skip basso sul posto: 2×20"',
+      'Squat a corpo libero: 2×10',
     ],
   },
 };

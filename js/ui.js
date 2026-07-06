@@ -214,8 +214,8 @@ const UI = {
         '<p>' + U.esc(DB.TEST[vm.testFatto].nome) + ': risultati registrati, li trovi in PROGRESSI.</p></div>';
     }
 
-    /* riscaldamento */
-    const risc = DB.RISCALDAMENTI[vm.tipo];
+    /* riscaldamento (unico: nei giorni di pioggia c'è la versione da garage) */
+    const risc = vm.pioggia ? DB.RISCALDAMENTI.pioggia : DB.RISCALDAMENTI[vm.tipo];
     if (risc) {
       html += '<details class="dettagli-box"><summary>🔥 ' + U.esc(risc.nome) + '</summary><ul>' +
         risc.voci.map(v => '<li>' + U.esc(v) + '</li>').join('') + '</ul></details>';
@@ -227,14 +227,24 @@ const UI = {
       /* seduta di corsa (nei giorni test i blocchi normali non ci sono: conta il test) */
       if (!vm.soloTest) html += '<p class="corsa-nome">' + U.esc(vm.corsaNome) + (vm.consolidamento ? ' <span class="chip chip-consolida">mantenimento</span>' : '') + '</p>';
       vm.blocchi.forEach((b, i) => {
-        const fatto = vm.spunte[i] && vm.spunte[i][0];
+        /* come per i pesi: un tasto per ogni ripetuta, il recupero parte alla spunta */
+        const nSerie = b.serie || 1;
+        const sp = vm.spunte[i] || [];
+        let serieHtml = '<div class="serie-riga">';
+        for (let s = 0; s < nSerie; s++) {
+          const fatta = !!sp[s];
+          serieHtml += '<button class="serie-btn ' + (fatta ? 'fatta' : '') + '" ' + (bloccata ? 'disabled' : '') +
+            ' data-action="spunta" data-slot="' + i + '" data-serie="' + s + '" data-rec="' + (b.recupero || 0) + '">' +
+            (fatta ? '✓' : (nSerie === 1 ? 'fatto' : (s + 1))) + '</button>';
+        }
+        serieHtml += '</div>';
         html += '<div class="card-esercizio">' +
-          '<div class="es-testata"><strong>' + U.esc(b.titolo) + '</strong></div>' +
+          '<div class="es-testata"><strong>' + U.esc(b.titolo) + '</strong>' +
+          (nSerie > 1 ? '<span class="chip">' + nSerie + ' serie</span>' : '') + '</div>' +
           '<p class="es-dettaglio">' + U.esc(b.dettaglio) + '</p>' +
-          '<div class="serie-riga">' +
-          '<button class="serie-btn ' + (fatto ? 'fatta' : '') + '" ' + (bloccata ? 'disabled' : '') + ' data-action="spunta" data-slot="' + i + '" data-serie="0" data-rec="' + (b.recupero || 0) + '">' + (fatto ? '✓' : '') + ' blocco fatto</button>' +
-          (b.recupero ? '<button class="btn-mini" data-action="avvia-recupero" data-sec="' + b.recupero + '">⏱ ' + U.fmtMMSS(b.recupero) + '</button>' : '') +
-          '</div></div>';
+          serieHtml +
+          (b.recupero ? '<div class="es-piede"><span>recupero ' + U.fmtMMSS(b.recupero) + '</span></div>' : '') +
+          '</div>';
       });
     } else {
       vm.esercizi.forEach((ex, i) => {
@@ -266,7 +276,14 @@ const UI = {
 
     let carico = '';
     if (ex.carico != null) {
-      carico = '<div class="es-carico"><strong>' + U.fmtKg(ex.carico) + '</strong>' +
+      /* tasti − / + per correggere il carico a mano (rispettano dischi pari, inserti e tetti) */
+      const editor = bloccata
+        ? '<strong>' + U.fmtKg(ex.carico) + '</strong>'
+        : '<span class="carico-edit">' +
+          '<button class="btn-carico" data-action="carico-meno" data-ex="' + ex.exId + '" title="Abbassa il carico">−</button>' +
+          '<strong>' + U.fmtKg(ex.carico) + '</strong>' +
+          '<button class="btn-carico" data-action="carico-piu" data-ex="' + ex.exId + '" title="Alza il carico">+</button></span>';
+      carico = '<div class="es-carico">' + editor +
         (ex.big && ex.caricoBase !== ex.carico ? ' <small>(base ' + U.fmtKg(ex.caricoBase) + ')</small>' : '') +
         (ex.dettaglio ? '<br><small>' + U.esc(ex.dettaglio) + '</small>' : '') + '</div>';
     } else if (ex.livelloLabel) {
@@ -383,7 +400,7 @@ const UI = {
     let incomplete = false;
     const tot = vm.blocchi ? vm.blocchi.length : vm.esercizi.length;
     for (let i = 0; i < tot; i++) {
-      const serie = vm.blocchi ? 1 : vm.esercizi[i].serie;
+      const serie = vm.blocchi ? (vm.blocchi[i].serie || 1) : vm.esercizi[i].serie;
       const sp = (g.spunte && g.spunte[i]) || [];
       for (let s2 = 0; s2 < serie; s2++) if (!sp[s2]) { incomplete = true; break; }
       if (incomplete) break;

@@ -444,7 +444,7 @@ E.completaSeduta = function (iso) {
     const st = E.statoCorsa(vm.corsaId);
     const tot = vm.blocchi.length;
     let tutte = true;
-    vm.blocchi.forEach((b, i) => { if (!serieComplete(i, 1).complete) tutte = false; });
+    vm.blocchi.forEach((b, i) => { if (!serieComplete(i, b.serie || 1).complete) tutte = false; });
     dettagli.push({ nome: vm.corsaNome, schema: tot + ' blocchi', carico: null, complete: tutte });
     if (tutte) {
       if (st.consolidamento) {
