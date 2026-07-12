@@ -10,11 +10,12 @@
    - gilet zavorrato: 20 inserti da 1,2 kg → max 24 kg
    - power tower (trazioni, dip, alzate ginocchia), panca regolabile,
      landmine artigianale, ab roller, glute band, foam roller, cyclette (res. 1-8)
+   - gym ball (fitball): leg curl femorali, stir the pot, core
    - strada: scaletta, paracadute, coni, panchine di marmo
    ============================================================ */
 const DB = {};
 
-DB.BUILD = '1.5.0';
+DB.BUILD = '1.6.0';
 
 /* durata tipica delle sedute in minuti (per il calcolo del carico RPE×minuti) */
 DB.DURATE = { forza: 60, alta: 60, velocita: 50, resistenza: 45, attivazione: 25, recupero: 30 };
@@ -64,8 +65,10 @@ DB.ROTAZIONI = {
   braccia:    ['curl_ez', 'french_press'],
   unilaterale:['bulgaro', 'step_up'],
   adduttori:  ['copenhagen', 'landmine_rotation'],
+  femorali:   ['nordic_curl', 'gymball_leg_curl'],
   kettlebell: ['kb_swing', 'kb_stacco_monogamba'],
   core_base:  ['ab_roller', 'alzate_ginocchia'],
+  core_forza: ['plank_zavorrato', 'gymball_stir'],
   trazioni:   ['trazioni_prona', 'trazioni_supina', 'trazioni_neutra'],
 };
 
@@ -166,7 +169,7 @@ DB.ESERCIZI = {
     ],
   },
   nordic_curl: {
-    nome: 'Nordic curl (eccentrico)', tipoCarico: 'corpo',
+    nome: 'Nordic curl (eccentrico)', tipoCarico: 'corpo', rotazione: 'femorali',
     recupero: 90,
     livelli: [
       { label: '3×4 solo discesa, più lenta che puoi', schema: { serie: 3, reps: 4, label: '3×4 negativi' } },
@@ -414,8 +417,45 @@ DB.ESERCIZI = {
       'Se oscilli, fermati un attimo tra una ripetizione e l\'altra.',
     ],
   },
+  gymball_leg_curl: {
+    nome: 'Leg curl con gym ball', tipoCarico: 'corpo', rotazione: 'femorali',
+    recupero: 75,
+    livelli: [
+      { label: '3×8 a due gambe', schema: { serie: 3, reps: 8, label: '3×8' } },
+      { label: '3×10 a due gambe', schema: { serie: 3, reps: 10, label: '3×10' } },
+      { label: '3×12 a due gambe', schema: { serie: 3, reps: 12, label: '3×12' } },
+      { label: '3×6 a una gamba', schema: { serie: 3, reps: 6, label: '3×6 monogamba' } },
+      { label: '3×8 a una gamba', schema: { serie: 3, reps: 8, label: '3×8 monogamba' } },
+      { label: '3×10 a una gamba', schema: { serie: 3, reps: 10, label: '3×10 monogamba' } },
+    ],
+    esecuzione: [
+      'Sdraiato a pancia in su, talloni e polpacci sopra la gym ball, braccia a terra larghe per l\'equilibrio.',
+      'Alza il bacino: corpo in linea retta dalle spalle ai piedi (ponte). Questa è la posizione di partenza.',
+      'Piega le ginocchia e porta la palla verso i glutei, SENZA far scendere il bacino.',
+      'Distendi le gambe riportando la palla lontano, sempre col bacino alto.',
+      'Nella versione a una gamba, l\'altra resta sollevata a mezz\'aria.',
+    ],
+  },
+  gymball_stir: {
+    nome: 'Stir the pot su gym ball', tipoCarico: 'corpo', rotazione: 'core_forza',
+    recupero: 60,
+    livelli: [
+      { label: '3×6 cerchi per senso, piccoli', schema: { serie: 3, reps: 6, label: '3×6 per senso' } },
+      { label: '3×8 cerchi per senso', schema: { serie: 3, reps: 8, label: '3×8 per senso' } },
+      { label: '3×10 cerchi per senso', schema: { serie: 3, reps: 10, label: '3×10 per senso' } },
+      { label: '3×8 cerchi larghi per senso', schema: { serie: 3, reps: 8, label: '3×8 larghi' } },
+      { label: '3×10 cerchi larghi per senso', schema: { serie: 3, reps: 10, label: '3×10 larghi' } },
+    ],
+    esecuzione: [
+      'Avambracci appoggiati sulla gym ball, piedi a terra larghezza anche, corpo in plank.',
+      'Disegna cerchi con i gomiti, come per "mescolare la pentola".',
+      'Il corpo resta IMMOBILE: si muovono solo le braccia, il bacino non ondeggia.',
+      'Fai i cerchi in un senso, poi nell\'altro: quello è una ripetizione.',
+      'Cerchi più larghi = esercizio più duro.',
+    ],
+  },
   plank_zavorrato: {
-    nome: 'Plank con gilet zavorrato', tipoCarico: 'gilet',
+    nome: 'Plank con gilet zavorrato', tipoCarico: 'gilet', rotazione: 'core_forza',
     start: 0, inc: 1.2, cap: 24, recupero: 60,
     schema: { serie: 3, reps: 1, label: '3×40 secondi' },
     esecuzione: [
@@ -554,6 +594,14 @@ DB.DETTAGLI = {
     perche: 'L\'esercizio anti-stiramento per eccellenza: negli studi dimezza gli infortuni ai femorali. Per chi sprinta è oro puro.',
     errori: 'Piegarsi sulle anche (il corpo deve restare in linea) e scendere veloci: tutta la magia è nella lentezza.',
   },
+  gymball_leg_curl: {
+    perche: 'Femorali che si allungano e si accorciano sotto controllo, come nella corsa: forza e prevenzione insieme, il complemento perfetto del nordic.',
+    errori: 'Bacino che crolla mentre la palla si avvicina ai glutei; puntare le braccia per barare sull\'equilibrio.',
+  },
+  gymball_stir: {
+    perche: 'Il plank che prende vita: il core impara a restare fermo mentre tutto si muove — esattamente ciò che serve nei contrasti e nei cambi di direzione.',
+    errori: 'Fianchi che ondeggiano seguendo i cerchi; sedere che sale a capanna.',
+  },
   kb_swing: {
     perche: 'Potenza pura della catena posteriore: l\'esplosione d\'anca che ti stacca dall\'avversario sul primo passo.',
     errori: 'Accosciarsi come in uno squat o tirare su il kettlebell con le braccia: è l\'anca che spara, non le spalle.',
@@ -669,7 +717,7 @@ DB.SEDUTE = {
     nome: 'Forza gambe', icona: '🏋️', luogo: 'garage',
     slots: [
       { ex: 'squat' }, { ex: 'stacco_rumeno' }, { ex: 'hip_thrust' },
-      { rot: 'unilaterale' }, { rot: 'adduttori' }, { ex: 'nordic_curl' },
+      { rot: 'unilaterale' }, { rot: 'adduttori' }, { rot: 'femorali' },
       { rot: 'kettlebell' }, { ex: 'polpacci' },
     ],
   },
@@ -700,7 +748,7 @@ DB.SEDUTE = {
 /* core che cambia con la fase */
 DB.CORE_PER_FASE = {
   ipertrofia: { rot: 'core_base' },
-  forza: { ex: 'plank_zavorrato' },
+  forza: { rot: 'core_forza' },
   potenza: { ex: 'hollow_rock' },
 };
 
@@ -1064,7 +1112,7 @@ DB.SIXPACK = {
       nome: 'Solido', giri: 3,
       circuiti: [
         { label: 'A', voci: ['Crunch a terra × 20', 'Plank sui gomiti 45"', 'Side plank 30" per lato', 'Mountain climber lento × 10 per gamba'] },
-        { label: 'B', voci: ['Crunch con gambe alzate × 15', 'Plank con tocco spalla × 10 per lato', 'Russian twist × 12 per lato', 'Dead bug × 10 per lato'] },
+        { label: 'B', voci: ['Crunch sulla gym ball × 15 (schiena appoggiata sulla palla)', 'Plank con tocco spalla × 10 per lato', 'Russian twist × 12 per lato', 'Dead bug × 10 per lato'] },
       ],
     },
     {
@@ -1085,7 +1133,7 @@ DB.SIXPACK = {
       nome: 'Avanzato', giri: 4,
       circuiti: [
         { label: 'A', voci: ['Ab roller rollata completa × 12', 'Plank con gilet (12 kg) 45"', 'Alzate gambe tese × 10', 'Hollow rock × 15'] },
-        { label: 'B', voci: ['Dragon flag negativo sulla panca × 5 (solo discesa, lenta)', 'V-up completi × 12', 'Russian twist con disco da 5 kg × 12 per lato', 'Plank 90"'] },
+        { label: 'B', voci: ['Dragon flag negativo sulla panca × 5 (solo discesa, lenta)', 'V-up completi × 12', 'Russian twist con disco da 5 kg × 12 per lato', 'Plank con avambracci sulla gym ball 60"'] },
       ],
     },
     {

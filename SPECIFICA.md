@@ -12,6 +12,7 @@
 - Panca regolabile: panca piana/inclinata, hip thrust, rematore in appoggio, step-up, bulgari
 - Landmine "fatto in casa" (bilanciere incastrato nell'angolo)
 - Ab roller, glute band, foam roller, cyclette (resistenza 1-8)
+- Gym ball / fitball (leg curl femorali, stir the pot, core)
 
 ### 🛣️ Strada (velocità e resistenza)
 - Scaletta agilità, paracadute da sprint, coni
