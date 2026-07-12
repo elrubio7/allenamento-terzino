@@ -319,14 +319,19 @@ const UI = {
     const vm = E.risolviSeduta(UI.guida.iso);
     if (!vm) return;
     const passi = UI.passiGuida(vm);
-    const passo = passi[UI.guida.passo];
-    if (!passo) return;
-    let n = null, sp = [];
-    if (passo.tipo === 'esercizio') { n = vm.esercizi[passo.i].serie; sp = vm.spunte[passo.i] || []; }
-    if (passo.tipo === 'blocco') { n = vm.blocchi[passo.i].serie || 1; sp = vm.spunte[passo.i] || []; }
-    if (n == null) return;
-    for (let s = 0; s < n; s++) if (!sp[s]) return;
-    UI.guida.passo = Math.min(UI.guida.passo + 1, passi.length - 1);
+    /* scavalca in un colpo tutti i passi già completati */
+    let avanzato = true;
+    while (avanzato && UI.guida.passo < passi.length - 1) {
+      avanzato = false;
+      const passo = passi[UI.guida.passo];
+      let n = null, sp = [];
+      if (passo.tipo === 'esercizio') { n = vm.esercizi[passo.i].serie; sp = vm.spunte[passo.i] || []; }
+      if (passo.tipo === 'blocco') { n = vm.blocchi[passo.i].serie || 1; sp = vm.spunte[passo.i] || []; }
+      if (n == null) return;
+      let completo = true;
+      for (let s = 0; s < n; s++) if (!sp[s]) completo = false;
+      if (completo) { UI.guida.passo++; avanzato = true; }
+    }
   },
 
   renderSeduta() {
@@ -364,13 +369,16 @@ const UI = {
       if (!vm.soloTest) html += '<button class="btn-primario btn-guida" data-action="guida-avvia">▶ Inizia seduta guidata</button>';
     }
 
-    /* banner scarico / prontezza */
+    /* banner scarico / prontezza (testo diverso per garage e corsa) */
     if (vm.stato === 'da_fare' && vm.tipo !== 'recupero' && vm.tipo !== 'attivazione') {
+      const eCorsa = !!vm.blocchi;
       if (vm.scarico) {
-        html += '<div class="banner banner-info">🪫 Settimana di scarico: carichi ridotti del 15%, progressione in pausa. Muoviti bene, esci fresco.</div>';
+        html += '<div class="banner banner-info">🪫 Settimana di scarico: progressione in pausa. ' +
+          (eCorsa ? 'Taglia 1-2 serie dal lavoro e tieni ritmi comodi: si ricarica.' : 'Carichi ridotti del 15%. Muoviti bene, esci fresco.') + '</div>';
       }
       if (vm.prontezza === 'giallo') {
-        html += '<div class="banner banner-giallo">🟡 Giornata gialla: carichi già ridotti del 10%, oggi nessun aumento. Se un esercizio pesa troppo, taglia una serie senza rimorsi.</div>';
+        html += '<div class="banner banner-giallo">🟡 Giornata gialla: oggi nessun aumento. ' +
+          (eCorsa ? 'Taglia 1-2 serie e non cercare il ritmo migliore: qualità, non eroismi.' : 'Carichi già ridotti del 10%. Se un esercizio pesa troppo, taglia una serie senza rimorsi.') + '</div>';
       } else if (vm.prontezza === 'rosso') {
         html += '<div class="banner banner-rosso">🔴 Giornata rossa: il corpo chiede tregua. Il consiglio vero è non forzare.' +
           '<button class="btn-azione" data-action="diventa-recupero">🌿 Trasforma in recupero</button></div>';

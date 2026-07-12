@@ -15,7 +15,7 @@
    ============================================================ */
 const DB = {};
 
-DB.BUILD = '1.6.0';
+DB.BUILD = '1.6.1';
 
 /* durata tipica delle sedute in minuti (per il calcolo del carico RPE×minuti) */
 DB.DURATE = { forza: 60, alta: 60, velocita: 50, resistenza: 45, attivazione: 25, recupero: 30 };

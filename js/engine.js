@@ -101,7 +101,8 @@ E.setRPE = function (dataIso, rpe) {
 };
 E.caricoSeduta = function (s) {
   if (!s.rpe) return 0;
-  const minuti = s.tipo === 'partita' ? (s.minuti || 90) : (DB.DURATE[s.tipo] || 45);
+  /* 0 minuti = panchina: carico zero, non 90' fantasma */
+  const minuti = s.tipo === 'partita' ? (s.minuti != null ? s.minuti : 90) : (DB.DURATE[s.tipo] || 45);
   return s.rpe * minuti;
 };
 E.caricoFinestra = function (finoIso, giorni) {
@@ -662,12 +663,12 @@ E.completaSeduta = function (iso) {
 E.segnaPartitaGiocata = function (iso, minuti, rpe) {
   const g = S.data.settimana.giorni[iso];
   g.stato = 'fatta';
-  g.minuti = minuti || null;
+  g.minuti = minuti != null ? minuti : null;   /* 0 (panchina) è un valore valido */
   S.data.ultimaPartita = iso;
   S.data.storico.unshift({
     data: iso, completata: U.todayISO(), tipo: 'partita',
-    nome: 'Partita ⚽' + (minuti ? ' — ' + minuti + '\'' : ''),
-    fase: '', dettagli: [], minuti: minuti || null, rpe: rpe || null,
+    nome: 'Partita ⚽' + (minuti != null ? ' — ' + minuti + '\'' : ''),
+    fase: '', dettagli: [], minuti: minuti != null ? minuti : null, rpe: rpe || null,
   });
   S.save();
 };
@@ -675,7 +676,10 @@ E.segnaPartitaGiocata = function (iso, minuti, rpe) {
 /* consiglio per il giorno dopo la partita, in base a minuti e durezza */
 E.consiglioPostPartita = function () {
   const p = S.data.storico.find(s => s.tipo === 'partita');
-  if (!p || U.diffDays(p.data, U.todayISO()) !== 1 || !p.minuti) return null;
+  if (!p || U.diffDays(p.data, U.todayISO()) !== 1 || p.minuti == null) return null;
+  if (p.minuti === 0) {
+    return 'Ieri non sei entrato: gambe fresche. Se te la senti, oggi puoi trasformare il recupero in una seduta vera (usa 🔀 sposta).';
+  }
   if (p.minuti >= 75 && (p.rpe || 0) >= 7) {
     return 'Ieri ' + p.minuti + '\' tosti (fatica ' + p.rpe + '/10): recupero extra oggi — aggiungi 10\' di cyclette dolce e il giro completo di foam roller.';
   }

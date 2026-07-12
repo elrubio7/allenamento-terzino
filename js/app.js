@@ -69,6 +69,9 @@
       case 'correggi':
         if (confirm('Vuoi rifare la scelta della settimana? Le sedute già completate restano com\'erano, il resto viene rigenerato.')) {
           /* si conserva la vecchia settimana: i giorni già fatti non tornano ripetibili */
+          if (S.data.settimana && S.data.settimana.tipo === 'scarico' && S.data.ultimoScarico === S.data.settimana.inizio) {
+            S.data.ultimoScarico = null;   /* scarico annullato: torna consigliabile */
+          }
           S.data._correzione = S.data.settimana;
           S.data.settimana = null;
           S.save();
@@ -76,6 +79,10 @@
         }
         break;
       case 'correggi-prossima':
+        /* se lo scarico scelto viene annullato, torna consigliabile subito */
+        if (S.data.prossima && S.data.prossima.tipo === 'scarico' && S.data.ultimoScarico === S.data.prossima.inizio) {
+          S.data.ultimoScarico = null;
+        }
         S.data.prossima = null;
         S.save();
         UI.render();
@@ -100,9 +107,14 @@
 
       /* seduta guidata */
       case 'guida-avvia': UI.guida = { iso, passo: 0 }; UI.renderSeduta(); break;
-      case 'guida-avanti': if (UI.guida) { UI.guida.passo++; UI.renderSeduta(); } break;
+      case 'guida-avanti':
+        if (UI.guida) {
+          UI.guida.passo++;
+          UI.guidaAvanzaSeCompleto();  /* salta i passi già completati prima di entrare */
+          UI.renderSeduta();
+        }
+        break;
       case 'guida-esci': UI.guida = null; UI.renderSeduta(); break;
-      case 'avvia-recupero': T.startRest(Number(el.dataset.sec) || 60, 'Recupero'); break;
       case 'carico-piu':
       case 'carico-meno': {
         const id = el.dataset.ex;
@@ -172,6 +184,7 @@
       case 'diventa-recupero': {
         const g = S.data.settimana.giorni[iso];
         g.tipo = 'recupero'; g.spunte = {}; g.pioggia = false;
+        g.test = null;   /* il test tornerà nel prossimo giorno adatto */
         S.save();
         UI.renderSeduta();
         UI.toast('Fatto: oggi recupero. Il corpo ringrazia, i numeri torneranno.');
