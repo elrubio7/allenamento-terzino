@@ -6,9 +6,11 @@
 const E = {};
 
 /* ---------- arrotondamenti legati all'attrezzatura ---------- */
-E.caricoValido = function (tipoCarico, kg) {
+E.caricoValido = function (tipoCarico, kg, landmine) {
   if (tipoCarico === 'bilanciere') {
-    let v = Math.round(kg / 2) * 2;                    // sempre pari (dischi in coppia)
+    /* bilanciere normale: i dischi vanno in coppia → numeri pari.
+       landmine: si carica UNA sola estremità → va bene qualsiasi kg intero. */
+    const v = landmine ? Math.round(kg) : Math.round(kg / 2) * 2;
     return Math.min(DB.CAPS.bilanciere, Math.max(DB.PESO_BILANCIERE, v));
   }
   if (tipoCarico === 'gilet') {
@@ -22,38 +24,62 @@ E.caricoValido = function (tipoCarico, kg) {
   return kg;
 };
 
-/* dischi per lato del bilanciere, es. 34 kg → "10+2+2 per lato" */
-E.piastreLato = function (kg) {
-  let resto = Math.round((kg - DB.PESO_BILANCIERE) / 2);
-  if (resto <= 0) return 'solo bilanciere';
+/* quali dischi mettere per fare `kg`, pescando dalla dotazione reale */
+E.dischiPer = function (kg, inventario) {
+  let resto = Math.round(kg * 10) / 10;
   const usati = [];
-  for (const p of DB.PIASTRE_LATO) {
-    if (p <= resto) { usati.push(p); resto -= p; }
-    if (resto === 0) break;
+  for (const p of inventario) {
+    if (p <= resto + 0.001) { usati.push(p); resto = Math.round((resto - p) * 10) / 10; }
+    if (resto <= 0) break;
   }
-  return 'dischi per lato: ' + usati.join('+');
+  return usati;
 };
 
-/* landmine: il bilanciere è incastrato nell'angolo, si carica UNA sola estremità */
-E.piastreLandmine = function (kg) {
-  let resto = Math.round(kg - DB.PESO_BILANCIERE);
-  if (resto <= 0) return 'solo bilanciere';
-  const usati = [];
-  for (const p of DB.PIASTRE_LATO) {
-    if (p <= resto) { usati.push(p); resto -= p; }
-    if (resto === 0) break;
-  }
-  return 'dischi sull\'estremità: ' + usati.join('+');
-};
-
+/* Come si carica il bilanciere/gilet: restituisce le righe già pronte da leggere.
+   { testo, dischi, etichetta, avviso }                                        */
 E.dettaglioCarico = function (ex, kg) {
-  if (ex.tipoCarico === 'bilanciere') return ex.landmine ? E.piastreLandmine(kg) : E.piastreLato(kg);
+  const vuoto = { testo: '', dischi: null, etichetta: null, avviso: null };
+
+  if (ex.tipoCarico === 'bilanciere') {
+    const suiDischi = Math.round((kg - DB.PESO_BILANCIERE) * 10) / 10;
+    if (ex.landmine) {
+      /* landmine: bilanciere incastrato nell'angolo, si carica solo l'estremità che impugni */
+      if (suiDischi <= 0) {
+        return { testo: 'solo il bilanciere (6 kg)', dischi: null, etichetta: null,
+                 avviso: 'landmine: si carica una sola estremità' };
+      }
+      return {
+        testo: 'bilanciere 6 kg + ' + U.fmtKg(suiDischi) + ' di dischi',
+        dischi: E.dischiPer(suiDischi, DB.PIASTRE_TOTALI).join(' + '),
+        etichetta: 'tutti su UNA sola estremità',
+        avviso: 'landmine: si carica una sola estremità',
+      };
+    }
+    const perLato = Math.round(suiDischi / 2 * 10) / 10;
+    if (perLato <= 0) return { testo: 'solo il bilanciere (6 kg)', dischi: null, etichetta: null, avviso: null };
+    return {
+      testo: 'bilanciere 6 kg + ' + U.fmtKg(perLato) + ' per lato',
+      dischi: E.dischiPer(perLato, DB.PIASTRE_LATO).join(' + '),
+      etichetta: 'su OGNI lato',
+      avviso: null,
+    };
+  }
+
   if (ex.tipoCarico === 'gilet') {
     const ins = Math.round(kg / DB.INSERTO_GILET);
-    return ins <= 0 ? 'a corpo libero (gilet non ancora necessario)' : 'gilet con ' + ins + (ins === 1 ? ' inserto' : ' inserti') + ' da 1,2 kg';
+    if (ins <= 0) return { testo: 'a corpo libero (gilet non ancora necessario)', dischi: null, etichetta: null, avviso: null };
+    return {
+      testo: 'gilet zavorrato',
+      dischi: ins + (ins === 1 ? ' inserto' : ' inserti') + ' da 1,2 kg',
+      etichetta: 'da infilare nel gilet',
+      avviso: null,
+    };
   }
-  if (ex.tipoCarico === 'manubrio') return 'per manubrio';
-  return '';
+
+  if (ex.tipoCarico === 'manubrio') {
+    return { testo: 'un manubrio da ' + U.fmtKg(kg), dischi: null, etichetta: null, avviso: null };
+  }
+  return vuoto;
 };
 
 /* ---------- stato per esercizio / lavoro di corsa ---------- */
@@ -200,7 +226,7 @@ E.risolviSlot = function (slot, iso, faseChiave) {
   const st = E.statoEx(exId);
   const fase = DB.FASI[faseChiave];
 
-  let schema, carico = null, caricoBase = null, dettaglio = '', livelloLabel = null;
+  let schema, carico = null, caricoBase = null, dettaglio = null, livelloLabel = null;
   if (ex.livelli) {
     const liv = Math.min(st.livello || 0, ex.livelli.length - 1);
     schema = ex.livelli[liv].schema;
@@ -208,13 +234,13 @@ E.risolviSlot = function (slot, iso, faseChiave) {
   } else if (ex.big) {
     schema = fase.schemaBig;
     caricoBase = st.carico;
-    carico = E.caricoValido(ex.tipoCarico, st.carico * fase.moltiplicatore);
+    carico = E.caricoValido(ex.tipoCarico, st.carico * fase.moltiplicatore, ex.landmine);
     if (ex.cap != null && carico > ex.cap) carico = ex.cap;
     dettaglio = E.dettaglioCarico(ex, carico);
   } else {
     schema = ex.schema;
     if (ex.tipoCarico !== 'corpo' && ex.tipoCarico !== 'band') {
-      carico = E.caricoValido(ex.tipoCarico, st.carico);
+      carico = E.caricoValido(ex.tipoCarico, st.carico, ex.landmine);
       if (ex.cap != null && carico > ex.cap) carico = ex.cap;
       dettaglio = E.dettaglioCarico(ex, carico);
     }
@@ -295,7 +321,7 @@ E.risolviSeduta = function (iso) {
     for (const e of vm.esercizi) {
       if (e.carico != null && e.carico > 0) {
         const def = DB.ESERCIZI[e.exId];
-        e.carico = E.caricoValido(e.tipoCarico, e.carico * riduzione);
+        e.carico = E.caricoValido(e.tipoCarico, e.carico * riduzione, def.landmine);
         if (def.cap != null && e.carico > def.cap) e.carico = def.cap;
         e.dettaglio = E.dettaglioCarico(def, e.carico);
       }
@@ -622,7 +648,7 @@ E.completaSeduta = function (iso) {
         } else if (def.tipoCarico === 'band' || def.tipoCarico === 'corpo') {
           /* attivazione/recupero: nessuna progressione */
         } else {
-          let prossimo = E.caricoValido(def.tipoCarico, st.carico + def.inc);
+          let prossimo = E.caricoValido(def.tipoCarico, st.carico + def.inc, def.landmine);
           if (def.cap != null && prossimo > def.cap) prossimo = st.carico; // tetto per-esercizio
           if (prossimo > st.carico) {
             migliorie.push({ nome: ex.nome, testo: U.fmtKg(st.carico) + ' → ' + U.fmtKg(prossimo) });

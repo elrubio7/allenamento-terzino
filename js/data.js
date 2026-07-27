@@ -15,14 +15,15 @@
    ============================================================ */
 const DB = {};
 
-DB.BUILD = '1.7.0';
+DB.BUILD = '1.8.0';
 
 /* durata tipica delle sedute in minuti (per il calcolo del carico RPE×minuti) */
 DB.DURATE = { forza: 60, alta: 60, velocita: 50, resistenza: 45, attivazione: 25, recupero: 30 };
 
 DB.CAPS = { bilanciere: 72, gilet: 24, manubrio: 8 };
 DB.PESO_BILANCIERE = 6;          // sia classico che EZ
-DB.PIASTRE_LATO = [10, 5, 5, 5, 2, 2, 1, 1, 1, 1]; // dischi disponibili per lato
+DB.PIASTRE_LATO = [10, 5, 5, 5, 2, 2, 1, 1, 1, 1]; // dischi disponibili per lato (metà dotazione)
+DB.PIASTRE_TOTALI = [10, 10, 5, 5, 5, 5, 5, 5, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1]; // tutti i dischi (landmine: un lato solo)
 DB.INSERTO_GILET = 1.2;
 
 /* ---------- FASI (macrociclo) ----------
@@ -158,7 +159,7 @@ DB.ESERCIZI = {
   },
   landmine_rotation: {
     nome: 'Landmine rotation', tipoCarico: 'bilanciere', landmine: true, rotazione: 'adduttori',
-    start: 6, inc: 2, cap: 26, recupero: 60,
+    start: 6, inc: 1, cap: 26, recupero: 60,
     schema: { serie: 3, reps: 8, label: '3×8 per lato' },
     esecuzione: [
       'Bilanciere incastrato nell\'angolo (landmine), impugna l\'estremità con entrambe le mani, braccia tese.',
@@ -343,7 +344,7 @@ DB.ESERCIZI = {
   },
   landmine_press: {
     nome: 'Landmine press', tipoCarico: 'bilanciere', landmine: true, rotazione: 'spalle',
-    start: 10, inc: 2, cap: 32, recupero: 75,
+    start: 10, inc: 1, cap: 32, recupero: 75,
     schema: { serie: 4, reps: 8, label: '4×8 per lato' },
     esecuzione: [
       'Bilanciere nell\'angolo landmine, estremità impugnata con una mano all\'altezza della spalla.',

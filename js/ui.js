@@ -479,22 +479,26 @@ const UI = {
     if (ex.consolidamento) badges += '<span class="chip chip-consolida">mantenimento</span>';
     if (ex.fastidio) badges += '<span class="chip chip-fastidio">⚠ progressione in pausa</span>';
 
-    let carico = '';
+    /* il carico si legge a colpo d'occhio: totale grande, poi come si carica davvero */
+    let inline = '', boxCarico = '';
     if (ex.carico != null) {
-      /* tasti − / + per correggere il carico a mano (rispettano dischi pari, inserti e tetti) */
+      const d = ex.dettaglio || {};
       const editor = bloccata
         ? '<strong>' + U.fmtKg(ex.carico) + '</strong>'
-        : '<span class="carico-edit">' +
-          '<button class="btn-carico" data-action="carico-meno" data-ex="' + ex.exId + '" title="Abbassa il carico">−</button>' +
+        : '<button class="btn-carico" data-action="carico-meno" data-ex="' + ex.exId + '" title="Abbassa il carico">−</button>' +
           '<strong>' + U.fmtKg(ex.carico) + '</strong>' +
-          '<button class="btn-carico" data-action="carico-piu" data-ex="' + ex.exId + '" title="Alza il carico">+</button></span>';
-      carico = '<div class="es-carico">' + editor +
-        (ex.big && ex.caricoBase !== ex.carico ? ' <small>(base ' + U.fmtKg(ex.caricoBase) + ')</small>' : '') +
-        (ex.dettaglio ? '<br><small>' + U.esc(ex.dettaglio) + '</small>' : '') + '</div>';
+          '<button class="btn-carico" data-action="carico-piu" data-ex="' + ex.exId + '" title="Alza il carico">+</button>';
+      boxCarico = '<div class="carico-box' + (d.avviso ? ' landmine' : '') + '">' +
+        '<div class="carico-riga">' + editor +
+        (ex.big && ex.caricoBase !== ex.carico ? '<span class="carico-base">base ' + U.fmtKg(ex.caricoBase) + '</span>' : '') +
+        '</div>' +
+        (d.testo ? '<div class="carico-come">' + U.esc(d.testo) + '</div>' : '') +
+        (d.dischi ? '<div class="carico-dischi"><span class="carico-etichetta">' + U.esc(d.etichetta || '') + '</span>' +
+          '<span class="carico-lista">' + U.esc(d.dischi) + '</span></div>' : '') +
+        (d.avviso ? '<div class="carico-avviso">⚠ ' + U.esc(d.avviso) + '</div>' : '') +
+        '</div>';
     } else if (ex.livelloLabel) {
-      carico = '<div class="es-carico"><small>' + U.esc(ex.livelloLabel) + '</small></div>';
-    } else if (ex.dettaglio) {
-      carico = '<div class="es-carico"><small>' + U.esc(ex.dettaglio) + '</small></div>';
+      inline = '<span class="es-livello">' + U.esc(ex.livelloLabel) + '</span>';
     }
 
     let serie = '<div class="serie-riga">';
@@ -510,7 +514,8 @@ const UI = {
 
     return '<div class="card-esercizio">' +
       '<div class="es-testata"><strong>' + U.esc(ex.nome) + '</strong>' + badges + '</div>' +
-      '<div class="es-riga"><span class="es-schema">' + U.esc(ex.schemaLabel) + '</span>' + carico + '</div>' +
+      '<div class="es-riga"><span class="es-schema">' + U.esc(ex.schemaLabel) + '</span>' + inline + '</div>' +
+      boxCarico +
       '<details class="es-esecuzione"><summary>Come si esegue</summary>' +
       (ex.perche ? '<p class="es-perche">🎯 A cosa serve: ' + U.esc(ex.perche) + '</p>' : '') +
       '<ul>' + ex.esecuzione.map(v => '<li>' + U.esc(v) + '</li>').join('') + eseFase + '</ul>' +

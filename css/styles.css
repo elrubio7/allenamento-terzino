@@ -281,15 +281,48 @@ h2, h3 { text-transform: uppercase; letter-spacing: .03em; }
 .es-schema { color: var(--azzurro); font-weight: 800; font-size: 1.02rem; letter-spacing: .02em; }
 .es-carico { text-align: right; }
 .es-carico strong { font-size: 1.15rem; font-weight: 900; }
-.carico-edit { display: inline-flex; align-items: center; gap: 10px; }
+.es-livello { font-size: .82rem; color: var(--muto); text-align: right; }
+
+/* blocco del carico: totale grande + come si carica davvero */
+.carico-box {
+  background: var(--carta2);
+  border: 1px solid var(--bordo);
+  border-radius: 10px;
+  padding: 11px 13px;
+  margin: 10px 0 4px;
+}
+.carico-box.landmine { border-left: 3px solid var(--giallo); }
+.carico-riga { display: flex; align-items: center; gap: 12px; }
+.carico-riga strong {
+  font-size: 1.6rem; font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  min-width: 92px; text-align: center;
+}
+.carico-base { font-size: .68rem; color: var(--muto); margin-left: auto; text-transform: uppercase; letter-spacing: .05em; }
+.carico-come { font-size: .84rem; color: var(--muto); margin-top: 8px; }
+.carico-dischi {
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  margin-top: 6px; padding-top: 6px;
+  border-top: 1px dashed var(--bordo);
+}
+.carico-etichetta {
+  font-size: .6rem; font-weight: 800; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--muto);
+}
+.carico-lista {
+  font-size: 1.05rem; font-weight: 900; color: var(--accento);
+  font-variant-numeric: tabular-nums; letter-spacing: .02em;
+}
+.carico-avviso { font-size: .74rem; color: var(--giallo); margin-top: 7px; }
 .btn-carico {
-  width: 32px; height: 32px; border-radius: 8px;
-  border: 1px solid var(--bordo); background: var(--carta2);
-  font-size: 1.15rem; font-weight: 800; line-height: 1;
+  width: 40px; height: 40px; border-radius: 8px;
+  border: 1px solid var(--bordo); background: var(--carta);
+  font-size: 1.3rem; font-weight: 800; line-height: 1;
   color: var(--accento);
   display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
-.btn-carico:active { border-color: var(--accento); }
+.btn-carico:active { border-color: var(--accento); background: var(--carta2); }
 .es-dettaglio { color: var(--muto); font-size: .88rem; margin: 4px 0 8px; }
 .es-esecuzione summary, .dettagli-box summary {
   cursor: pointer; color: var(--muto); font-size: .82rem; padding: 5px 0;
