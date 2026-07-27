@@ -407,29 +407,43 @@ E.generaSettimana = function (tipo, partite, lun, comeProssima) {
     let i = 0;
     for (const iso of liberi()) assegna[iso] = coda[Math.min(i++, coda.length - 1)];
   } else if (partite.length) {
-    const prossima = partite[0];
-    /* velocità 2 giorni prima della partita (o 3 se occupato) */
-    for (const delta of [-2, -3]) {
-      const v = U.addDays(prossima, delta);
-      if (dentro(v) && !assegna[v]) { assegna[v] = 'velocita'; break; }
+    /* Ogni seduta si prende il giorno che le sta meglio rispetto alla partita.
+       Il riposo è ciò che avanza alla fine, mai il ripiego di un posto non trovato. */
+    const distGara = iso => Math.min(...partite.map(p => Math.abs(U.diffDays(iso, p))));
+    const daCollocare = partite.length >= 2
+      ? ['alta', 'velocita', 'forza', 'resistenza']   /* settimana fitta: prima le cose sicure */
+      : ['forza', 'velocita', 'resistenza', 'alta'];
+
+    for (const t of daCollocare) {
+      let scelto = null, migliorPunteggio = -Infinity;
+      for (const iso of liberi()) {
+        const d = distGara(iso);
+        let punti;
+        if (t === 'forza') {
+          punti = 50 + d * 10;                        /* il più lontano possibile dalla gara */
+        } else if (t === 'velocita') {
+          const primaDellaGara = partite.some(p => U.diffDays(iso, p) > 0);
+          punti = 60 - Math.abs(d - 2) * 5 + (primaDellaGara ? 5 : 0);  /* ideale: 2 giorni prima */
+        } else if (t === 'resistenza') {
+          punti = 40 + d * 3;
+        } else {
+          punti = 30 + (d <= 1 ? 5 : 0);              /* parte alta: sta bene ovunque, anche vicino */
+        }
+        if (t !== 'alta' && d < 2) punti -= 1000;     /* gambe mai attaccate alla partita */
+        /* garage e strada si alternano: niente due giorni di strada di fila */
+        if (DB.SEDUTE[t].luogo === 'strada') {
+          for (const vicino of [U.addDays(iso, -1), U.addDays(iso, 1)]) {
+            const a = assegna[vicino];
+            if (a && DB.SEDUTE[a].luogo === 'strada') punti -= 8;
+          }
+        }
+        if (punti > migliorPunteggio) { migliorPunteggio = punti; scelto = iso; }
+      }
+      /* se resta solo un giorno attaccato alla gara, quella seduta si salta */
+      if (scelto && migliorPunteggio > 0) assegna[scelto] = t;
     }
-    /* forza gambe: il giorno libero più lontano da tutte le partite (minimo 3 giorni) */
-    let migliore = null, distMigliore = -1;
-    for (const iso of liberi()) {
-      const dist = Math.min(...partite.map(p => Math.abs(U.diffDays(iso, p))));
-      if (dist > distMigliore) { distMigliore = dist; migliore = iso; }
-    }
-    if (migliore && distMigliore >= 3) assegna[migliore] = 'forza';
-    /* giorni rimasti: alterna garage/strada; una resistenza e una parte alta, poi recupero */
-    let altaFatta = false, resFatta = false;
-    for (const iso of liberi()) {
-      const prima = assegna[U.addDays(iso, -1)];
-      const luogoPrima = prima ? DB.SEDUTE[prima].luogo : null;
-      if (!resFatta && luogoPrima !== 'strada') { assegna[iso] = 'resistenza'; resFatta = true; }
-      else if (!altaFatta) { assegna[iso] = 'alta'; altaFatta = true; }
-      else if (!resFatta) { assegna[iso] = 'resistenza'; resFatta = true; }
-      else assegna[iso] = 'recupero';
-    }
+    /* quel che avanza è riposo vero: di norma uno solo */
+    for (const iso of liberi()) assegna[iso] = 'recupero';
   }
 
   const giorni = {};
