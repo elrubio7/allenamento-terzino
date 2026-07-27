@@ -11,22 +11,70 @@
 
     /* service worker per l'uso offline (non su file://) */
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-      navigator.serviceWorker.register('sw.js').catch(() => {});
+      /* updateViaCache 'none': il controllo versione parte sempre dal server */
+      navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(() => {});
 
-      /* quando arriva una versione nuova, l'app si ricarica da sola */
-      let ricaricato = false;
-      navigator.serviceWorker.addEventListener('controllerchange', function () {
-        if (ricaricato) return;
-        ricaricato = true;
-        location.reload();
-      });
-      /* e controlla se c'è una versione nuova ogni volta che riapri l'app */
+      /* quando la versione nuova prende il comando, l'app si ricarica da sola */
+      navigator.serviceWorker.addEventListener('controllerchange', ricaricaUnaVolta);
+
+      /* si controlla in tutti i modi in cui un telefono può tornare sull'app:
+         all'avvio, quando torna in primo piano, e ogni mezz'ora se resta aperta */
+      setTimeout(function () { cercaAggiornamenti(false); }, 3000);
       document.addEventListener('visibilitychange', function () {
-        if (!document.hidden) {
-          navigator.serviceWorker.getRegistration().then(reg => { if (reg) reg.update(); });
-        }
+        if (!document.hidden) cercaAggiornamenti(false);
       });
+      window.addEventListener('focus', function () { cercaAggiornamenti(false); });
+      window.addEventListener('pageshow', function (e) { if (e.persisted) cercaAggiornamenti(false); });
+      setInterval(function () { cercaAggiornamenti(false); }, 1800000);
     }
+  }
+
+  /* ---------- aggiornamento dell'app ---------- */
+  let ricaricato = false;
+  function ricaricaUnaVolta() {
+    if (ricaricato) return;
+    ricaricato = true;
+    location.reload();
+  }
+
+  /* se una versione nuova è pronta (o si sta installando), la si fa partire subito */
+  function attivaSePronto(reg) {
+    if (reg.waiting) { reg.waiting.postMessage('aggiorna-subito'); return true; }
+    if (reg.installing) {
+      const sw = reg.installing;
+      sw.addEventListener('statechange', function () {
+        if (sw.state === 'installed' && reg.waiting) reg.waiting.postMessage('aggiorna-subito');
+      });
+      return true;
+    }
+    return false;
+  }
+
+  function cercaAggiornamenti(manuale) {
+    if (!('serviceWorker' in navigator)) {
+      if (manuale) UI.toast('Aggiornamento automatico non disponibile su questo browser.');
+      return;
+    }
+    navigator.serviceWorker.getRegistration().then(function (reg) {
+      if (!reg) { if (manuale) location.reload(); return; }
+      if (attivaSePronto(reg)) {
+        if (manuale) UI.toast('Versione nuova trovata: aggiorno…');
+        return;
+      }
+      if (manuale) UI.toast('Controllo in corso…');
+      let trovata = false;
+      const suTrovata = function () { trovata = true; attivaSePronto(reg); };
+      reg.addEventListener('updatefound', suTrovata);
+      reg.update().then(function () {
+        setTimeout(function () {
+          reg.removeEventListener('updatefound', suTrovata);
+          if (!trovata && manuale) UI.toast('Sei già all\'ultima versione (build ' + DB.BUILD + ').');
+        }, 2500);
+      }).catch(function () {
+        reg.removeEventListener('updatefound', suTrovata);
+        if (manuale) UI.toast('Nessuna connessione: riprova quando sei online.');
+      });
+    });
   }
 
   /* la PWA può restare aperta per giorni: al cambio di data si riallinea da sola
@@ -245,6 +293,9 @@
 
       /* immagine della settimana */
       case 'esporta-settimana': UI.esportaSettimana(); break;
+
+      /* aggiornamento dell'app */
+      case 'aggiorna-app': cercaAggiornamenti(true); break;
 
       /* dati */
       case 'esporta': UI.esporta(); break;

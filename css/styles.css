@@ -711,6 +711,14 @@ h2, h3 { text-transform: uppercase; letter-spacing: .03em; }
 .pagella { border-left: 4px solid var(--accento); }
 .btn-esporta-sett { display: block; margin: 4px auto 14px; }
 
+/* numero di versione bene in vista */
+.build-grande {
+  font-size: 1.7rem; font-weight: 900; font-style: italic;
+  font-variant-numeric: tabular-nums;
+  color: var(--accento);
+  margin: 2px 0 10px;
+}
+
 /* rifiniture di carattere */
 .btn-primario {
   background: linear-gradient(180deg, var(--accento), #1fb757);

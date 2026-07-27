@@ -917,7 +917,12 @@ const UI = {
       '<div class="card-prep pericolo"><h3>🗑 Azzeramento totale</h3>' +
       '<p>Cancella TUTTO: carichi, storico, test, settimana. Non si torna indietro.</p>' +
       '<button class="btn-azione btn-pericolo" data-action="azzera">Azzera tutto</button></div>' +
-      '<div class="card-prep"><h3>ℹ️ Versione</h3><p>Build <strong>' + DB.BUILD + '</strong> · dati creati il ' + U.fmtData(S.data.creato) + '<br>' +
+      '<div class="card-prep"><h3>🔄 Versione dell\'app</h3>' +
+      '<div class="build-grande">build ' + DB.BUILD + '</div>' +
+      '<p>Di norma l\'app si aggiorna da sola quando la riapri con internet. Se sospetti di avere una versione vecchia, forzala da qui.</p>' +
+      '<button class="btn-primario" data-action="aggiorna-app">Cerca aggiornamenti</button>' +
+      '<p class="nota-sixpack">Nessun dato viene toccato: carichi, storico e progressi restano al loro posto.</p></div>' +
+      '<div class="card-prep"><h3>ℹ️ Dettagli</h3><p>Dati creati il ' + U.fmtData(S.data.creato) + '<br>' +
       'Sedute nello storico: ' + S.data.storico.length + '</p></div>';
   },
 

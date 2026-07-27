@@ -1,6 +1,6 @@
 'use strict';
 /* Service worker: dopo il primo caricamento l'app funziona senza internet. */
-const VERSIONE = 'terzino-1.8.1';
+const VERSIONE = 'terzino-1.9.0';
 const FILES = [
   './',
   './index.html',
@@ -19,7 +19,16 @@ const FILES = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(VERSIONE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
+  e.waitUntil(
+    caches.open(VERSIONE).then(c =>
+      /* cache: 'reload' = i file si prendono SEMPRE dal server, mai dalla copia
+         vecchia del telefono: è ciò che garantisce di installare la versione nuova.
+         Uno per uno, così un file irraggiungibile non blocca tutto l'aggiornamento. */
+      Promise.all(FILES.map(f =>
+        c.add(new Request(f, { cache: 'reload' })).catch(() => {})
+      ))
+    ).then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', e => {
@@ -28,6 +37,11 @@ self.addEventListener('activate', e => {
       .then(keys => Promise.all(keys.filter(k => k !== VERSIONE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
+});
+
+/* l'app può chiedere di passare subito alla versione nuova (tasto "cerca aggiornamenti") */
+self.addEventListener('message', e => {
+  if (e.data === 'aggiorna-subito') self.skipWaiting();
 });
 
 self.addEventListener('fetch', e => {
