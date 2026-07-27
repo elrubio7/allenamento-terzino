@@ -15,7 +15,7 @@
    ============================================================ */
 const DB = {};
 
-DB.BUILD = '1.8.0';
+DB.BUILD = '1.8.1';
 
 /* durata tipica delle sedute in minuti (per il calcolo del carico RPE×minuti) */
 DB.DURATE = { forza: 60, alta: 60, velocita: 50, resistenza: 45, attivazione: 25, recupero: 30 };
@@ -1200,35 +1200,36 @@ DB.TEST = {
 };
 
 /* ---------- NUTRIZIONE PRE-GARA ----------
-   Solo pre-partita: ricarica, spuntino e acqua, con i grammi in base al peso. */
+   SOLO spuntini e acqua, con i grammi in base al peso.
+   Colazione, pranzo e cena restano affare dell'atleta: l'app non ci mette bocca. */
 DB.nutrizione = function (kickoffMin, peso) {
   const p = peso || 70;
   const orario = m => U.pad2(Math.floor(((m % 1440) + 1440) % 1440 / 60)) + ':' + U.pad2(((m % 1440) + 1440) % 1440 % 60);
+  const fette = Math.max(3, Math.round(p / 14));
   return [
     {
-      quando: orario(kickoffMin - 180), titolo: 'Ricarica carboidrati (3 ore prima)',
+      quando: orario(kickoffMin - 150), titolo: 'Spuntino',
       voci: [
-        'Pane bianco ' + Math.round(p * 1.2) + ' g con marmellata ' + Math.round(p * 0.45) + ' g',
-        'in alternativa: riso in bianco ' + Math.round(p * 1.0) + ' g con un filo d\'olio',
+        fette + ' fette biscottate con ' + Math.round(p * 0.3) + ' g di miele (o marmellata)',
+        '1 banana media',
         'Acqua: 400 ml',
-        'Niente fibre, niente fritti, niente latticini interi da qui in poi',
+        'Da qui in poi: niente fibre, niente fritti, niente latticini interi',
       ],
     },
     {
-      quando: orario(kickoffMin - 90), titolo: 'Spuntino (1 ora e mezza prima)',
+      quando: orario(kickoffMin - 60), titolo: 'Spuntino leggero',
       voci: [
-        '1 banana media (~90 g)',
-        '2 fette biscottate con miele ' + Math.round(p * 0.2) + ' g',
+        '2 fette biscottate con ' + Math.round(p * 0.15) + ' g di miele, oppure mezza banana',
         'Acqua: 200 ml',
       ],
     },
     {
-      quando: orario(kickoffMin - 60) + ' → ' + orario(kickoffMin - 20), titolo: 'Idratazione a sorsi',
-      voci: ['400-500 ml di acqua a piccoli sorsi, non tutta insieme'],
+      quando: orario(kickoffMin - 45) + ' → ' + orario(kickoffMin - 20), titolo: 'Acqua a sorsi',
+      voci: ['300-400 ml a piccoli sorsi, mai tutta insieme'],
     },
     {
-      quando: orario(kickoffMin - 15), titolo: 'Ultimi minuti',
-      voci: ['150 ml di acqua', 'Se fa molto caldo: aggiungi un pizzico di sale o mezzo bicchiere di sport drink'],
+      quando: orario(kickoffMin - 10), titolo: 'Ultimi sorsi',
+      voci: ['150 ml di acqua', 'Se fa molto caldo: un pizzico di sale o mezzo bicchiere di sport drink'],
     },
   ];
 };

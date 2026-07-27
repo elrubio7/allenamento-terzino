@@ -49,7 +49,7 @@ Scheda dedicata agli addominali d'acciaio (spostata fuori da PREP su richiesta):
 Conto alla rovescia (tre beep: avvio, ultimi tre secondi, fine) e cronometro. Pillola in basso col recupero e tasto "salta". Il recupero tra le serie parte da solo.
 
 ## La nutrizione pre-gara
-Nella card della partita: orario del calcio d'inizio → cosa mangiare e bere a ritroso, con i grammi. Solo pre-gara: spuntino e ricarica, niente pasti principali.
+Nella card della partita: orario del calcio d'inizio → **solo spuntini e acqua** a ritroso, con i grammi calcolati sul peso. Niente colazione, pranzo o cena: i pasti principali restano dell'atleta.
 
 ## I test fisici
 Sprint, salti, salto monopodalico (con asimmetria), Cooper e Yo-Yo. Proposti ogni ~42 giorni, nel giorno giusto **al posto del lavoro normale** (il test sostituisce davvero la seduta). Test brevi insieme nel giorno velocità; i massimali uno per volta, **almeno 10 giorni tra Cooper e Yo-Yo**.

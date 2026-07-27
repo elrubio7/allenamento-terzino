@@ -552,9 +552,9 @@ const UI = {
   bloccoPartita(iso, vm) {
     const g = S.data.settimana.giorni[iso];
     let html = '<div class="card-partita"><h3>⚽ Giorno della partita</h3>' +
-      '<p>Inserisci l\'orario del calcio d\'inizio: l\'app calcola a ritroso cosa mangiare e bere.</p>' +
-      '<div class="kickoff-riga"><label>Calcio d\'inizio</label>' +
-      '<input type="time" id="kickoff" value="' + (vm.kickoff || '') + '"></div>';
+      '<p>Inserisci l\'orario del calcio d\'inizio: l\'app calcola a ritroso spuntini e acqua.</p>' +
+      '<div class="kickoff-riga"><label for="kickoff">Calcio d\'inizio</label>' +
+      '<input type="time" id="kickoff" step="300" value="' + (vm.kickoff || '') + '"></div>';
 
     if (vm.kickoff) {
       const parti = vm.kickoff.split(':').map(Number);
@@ -565,7 +565,7 @@ const UI = {
           '<div><strong>' + U.esc(r.titolo) + '</strong><ul>' +
           r.voci.map(v => '<li>' + U.esc(v) + '</li>').join('') + '</ul></div></div>';
       }
-      html += '<p class="nota-nutri">Grammature calcolate sul tuo peso (' + S.data.peso + ' kg — lo cambi nella scheda DATI). Solo pre-gara: i pasti principali restano i tuoi.</p></div>';
+      html += '<p class="nota-nutri">Grammature calcolate sul tuo peso (' + S.data.peso + ' kg — lo cambi nella scheda DATI).<br>Qui trovi <strong>solo spuntini e acqua</strong>: colazione, pranzo e cena restano i tuoi.</p></div>';
     }
 
     if (g.stato === 'fatta') {
