@@ -198,18 +198,14 @@
         UI.renderSeduta();
         break;
       }
-      case 'salita': {
+      /* la salita la programma l'app: questo è solo il ripiego quando non si può */
+      case 'salita-no': {
         const g = S.data.settimana.giorni[iso];
-        const acceso = !g.salita;
-        E.setSalita(iso, acceso);
+        E.setSalita(iso, false);
         g.spunte = {};
         S.save();
         UI.renderSeduta();
-        if (acceso) {
-          UI.toast(g.tipo === 'velocita'
-            ? '🏔 Salita dolce: sprint da 25 m al massimo, si torna giù sempre camminando.'
-            : '🏔 Salita ripida: balzi e ripetute da 40 m, recupero corto. Serve la macchina.');
-        }
+        UI.toast('Va bene: oggi la versione in piano. La salita tornerà da sola.');
         break;
       }
       case 'swap-apri': UI.swapInCorso = !UI.swapInCorso; UI.renderSeduta(); break;

@@ -619,6 +619,8 @@ h2, h3 { text-transform: uppercase; letter-spacing: .03em; }
 .banner-giallo { border-left: 4px solid var(--giallo); }
 .banner-rosso { border-left: 4px solid var(--rosso); }
 .banner-info { border-left: 4px solid var(--azzurro); }
+.banner-salita { border-left: 4px solid var(--arancio); }
+.banner-salita .link { margin-left: auto; }
 
 /* check di prontezza mattutino */
 .card-prontezza {

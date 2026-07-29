@@ -483,6 +483,23 @@ E.generaSettimana = function (tipo, partite, lun, comeProssima) {
     };
   }
 
+  /* le salite si programmano da sole: dolce nei giorni di velocità (secondo la fase),
+     ripida in UN giorno di resistenza ogni 2-3 settimane. Mai in scarico. */
+  if (tipo !== 'scarico') {
+    const faseSalita = tipo === 'costruzione' ? 'ipertrofia' : S.data.fase.nome;
+    let ripidaMessa = false;
+    for (const iso of giorniISO) {
+      const gg = giorni[iso];
+      if (gg.stato !== 'da_fare') continue;
+      if (gg.tipo === 'velocita') {
+        gg.salita = E.salitaDaProgrammare(iso, 'velocita', faseSalita);
+      } else if (gg.tipo === 'resistenza' && !ripidaMessa && E.salitaDaProgrammare(iso, 'resistenza', faseSalita)) {
+        gg.salita = true;
+        ripidaMessa = true;
+      }
+    }
+  }
+
   /* "ho sbagliato, correggi": i giorni già completati o saltati restano com'erano
      (niente doppia progressione completando due volte lo stesso giorno) */
   const corr = S.data._correzione;
@@ -552,14 +569,25 @@ E.setSalita = function (iso, val) {
   }
 };
 
-/* promemoria: la salita ripida rende se la fai ogni 2-3 settimane, non di più
-   (ed è quella per cui serve la macchina) */
-E.consigliaSalitaRipida = function (iso) {
-  const g = S.data.settimana && S.data.settimana.giorni[iso];
-  if (!g || g.tipo !== 'resistenza' || g.stato !== 'da_fare' || g.salita || g.pioggia) return false;
-  const ultima = S.data.ultimaSalitaRipida;
-  if (!ultima) return S.data.storico.length >= 6;   /* non alle primissime sedute */
-  return U.diffDays(ultima, iso) >= 18;
+/* ---------- quando ci va la salita: decide l'app ----------
+   Dolce (25 m, a piedi) nei giorni di velocità:
+     · ipertrofia → sempre: è la fase in cui si costruisce, e in salita è più sicuro
+     · forza      → a settimane alterne col paracadute (due sprint resistiti diversi)
+     · potenza    → mai: lì comanda l'RSA in piano, che è specifica da gara
+   Ripida (40 m, in macchina) nei giorni di resistenza: ogni 2-3 settimane.
+   In settimana di scarico niente salite: si ricarica.                       */
+E.salitaDaProgrammare = function (iso, tipoGiorno, faseChiave) {
+  if (tipoGiorno === 'velocita') {
+    if (faseChiave === 'ipertrofia') return true;
+    if (faseChiave === 'forza') return U.weekNumber(iso) % 2 === 1;
+    return false;
+  }
+  if (tipoGiorno === 'resistenza') {
+    const ultima = S.data.ultimaSalitaRipida;
+    if (!ultima) return S.data.storico.length >= 6;   /* non alle primissime sedute */
+    return U.diffDays(ultima, iso) >= 18;
+  }
+  return false;
 };
 
 E.setSpunta = function (iso, slot, serie, val) {

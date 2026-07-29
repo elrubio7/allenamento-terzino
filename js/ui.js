@@ -362,17 +362,17 @@ const UI = {
     if (vm.stato === 'da_fare') {
       html += '<div class="seduta-azioni">';
       if (vm.tipo === 'velocita' || vm.tipo === 'resistenza') {
-        html += '<button class="btn-azione ' + (vm.pioggia ? 'attivo' : '') + '" data-action="pioggia">🌧 ' + (vm.pioggia ? 'torna in strada' : 'piove: versione garage') + '</button>' +
-          '<button class="btn-azione ' + (vm.salita ? 'attivo' : '') + '" data-action="salita">🏔 ' +
-          (vm.salita ? 'torna in piano' : (vm.tipo === 'velocita' ? 'salita dolce (25 m)' : 'salita ripida (40 m)')) + '</button>';
+        html += '<button class="btn-azione ' + (vm.pioggia ? 'attivo' : '') + '" data-action="pioggia">🌧 ' + (vm.pioggia ? 'torna in strada' : 'piove: versione garage') + '</button>';
       }
       html += '<button class="btn-azione" data-action="swap-apri">🔀 sposta</button>' +
         '<button class="btn-azione" data-action="non-posso">🚫 oggi non posso</button></div>';
       if (UI.swapInCorso) html += UI.swapScelta(iso);
-      /* promemoria: la salita ripida rende se torna ogni 2-3 settimane */
-      if (E.consigliaSalitaRipida(iso)) {
-        html += '<div class="banner banner-info">🏔 Sono passate più di due settimane dall\'ultima salita ripida: se oggi hai modo di prendere la macchina, è la giornata giusta.' +
-          '<button class="btn-azione" data-action="salita">Passa alla salita</button></div>';
+      /* giornata in salita: la mette l'app, qui si spiega perché */
+      if (vm.salita) {
+        html += '<div class="banner banner-salita">' + (vm.tipo === 'velocita'
+          ? '🏔 <strong>Oggi si sprinta in salita</strong> — la dolce da 25 m, quella a piedi. In questa fase si costruisce lì: stessa spinta al massimo, femorali al sicuro.'
+          : '🏔 <strong>Oggi salita ripida</strong> — i 40 m, quindi serve la macchina. Torna ogni 2-3 settimane: è la seduta che costruisce le gambe che non mollano al 90°.') +
+          '<button class="link" data-action="salita-no">non ci riesco: fammela in piano</button></div>';
       }
       if (!vm.soloTest) html += '<button class="btn-primario btn-guida" data-action="guida-avvia">▶ Inizia seduta guidata</button>';
     }

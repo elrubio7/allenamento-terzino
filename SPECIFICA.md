@@ -18,7 +18,7 @@
 - Scaletta agilità, paracadute da sprint, coni
 - Panchine di marmo (step-up, piegamenti, dip, salti)
 - Strada per corsa, sprint, ripetute e test
-- **Salite** (entrambe brevi): una **dolce da ~25 m** raggiungibile a piedi (sprint di accelerazione, giorni di velocità) e una **ripida da ~40 m** a cui si arriva in macchina (balzi e ripetute con recupero corto, giorni di resistenza). Si attivano col tasto 🏔 sulle sedute di strada; la salita ripida viene ricordata ogni 2-3 settimane.
+- **Salite** (entrambe brevi): una **dolce da ~25 m** raggiungibile a piedi e una **ripida da ~40 m** a cui si arriva in macchina. **Le programma l'app da sola**, non c'è nessun tasto da ricordare: la dolce nei giorni di velocità (sempre in fase ipertrofia, a settimane alterne col paracadute in fase forza, mai in potenza dove comanda l'RSA in piano); la ripida in un giorno di resistenza ogni 2-3 settimane. Mai in settimana di scarico. Sulla seduta un riquadro spiega il perché, con un rimando discreto per farla in piano se quel giorno non si può.
 
 **Regola fissa: garage e strada mai lo stesso giorno.** Eccezioni volute: la scaletta al coperto se piove, la cyclette come sostituto della strada col tasto 🌧.
 
