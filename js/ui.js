@@ -274,6 +274,14 @@ const UI = {
      ============================================================ */
   guida: null,   // { iso, passo }
 
+  /* il riscaldamento giusto per la seduta: garage se piove, sulla salita
+     stessa quando si va alla ripida (lì non c'è piano), altrimenti quello del tipo */
+  riscaldamentoDi(vm) {
+    if (vm.pioggia) return DB.RISCALDAMENTI.pioggia;
+    if (vm.salita && vm.tipo === 'resistenza') return DB.RISCALDAMENTI.salita_ripida;
+    return DB.RISCALDAMENTI[vm.tipo];
+  },
+
   passiGuida(vm) {
     const passi = [{ tipo: 'riscaldamento' }];
     if (vm.blocchi) vm.blocchi.forEach((b, i) => passi.push({ tipo: 'blocco', i }));
@@ -296,7 +304,7 @@ const UI = {
       '<div class="guida-barra"><div class="guida-barra-fill" style="width:' + Math.round(p / (passi.length - 1) * 100) + '%"></div></div>';
 
     if (passo.tipo === 'riscaldamento') {
-      const risc = vm.pioggia ? DB.RISCALDAMENTI.pioggia : DB.RISCALDAMENTI[vm.tipo];
+      const risc = UI.riscaldamentoDi(vm);
       html += '<div class="card-prep"><h3>🔥 ' + U.esc(risc.nome) + '</h3><ol>' +
         risc.voci.map(v => '<li>' + U.esc(v) + '</li>').join('') + '</ol></div>' +
         '<button class="btn-primario" data-action="guida-avanti">Riscaldamento fatto ›</button>';
@@ -371,7 +379,7 @@ const UI = {
       if (vm.salita) {
         html += '<div class="banner banner-salita">' + (vm.tipo === 'velocita'
           ? '🏔 <strong>Oggi si sprinta in salita</strong> — la dolce da 25 m, quella a piedi. In questa fase si costruisce lì: stessa spinta al massimo, femorali al sicuro.'
-          : '🏔 <strong>Oggi salita ripida</strong> — i 40 m, quindi serve la macchina. Torna ogni 2-3 settimane: è la seduta che costruisce le gambe che non mollano al 90°.') +
+          : '🏔 <strong>Oggi salita ripida</strong> — i 40 m, quindi serve la macchina. <strong>È una seduta a sé</strong>: arrivi, ti scaldi sulla salita stessa (il riscaldamento qui sotto è fatto apposta, senza tratti piani), lavori e torni. Mai attaccata a un altro allenamento.') +
           '<button class="link" data-action="salita-no">non ci riesco: fammela in piano</button></div>';
       }
       if (!vm.soloTest) html += '<button class="btn-primario btn-guida" data-action="guida-avvia">▶ Inizia seduta guidata</button>';
@@ -410,8 +418,8 @@ const UI = {
         '<p>' + U.esc(DB.TEST[vm.testFatto].nome) + ': risultati registrati, li trovi in PROGRESSI.</p></div>';
     }
 
-    /* riscaldamento (unico: nei giorni di pioggia c'è la versione da garage) */
-    const risc = vm.pioggia ? DB.RISCALDAMENTI.pioggia : DB.RISCALDAMENTI[vm.tipo];
+    /* riscaldamento (unico: cambia con pioggia e con la salita ripida) */
+    const risc = UI.riscaldamentoDi(vm);
     if (risc) {
       html += '<details class="dettagli-box"><summary>🔥 ' + U.esc(risc.nome) + '</summary><ul>' +
         risc.voci.map(v => '<li>' + U.esc(v) + '</li>').join('') + '</ul></details>';

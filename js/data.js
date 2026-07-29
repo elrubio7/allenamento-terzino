@@ -16,7 +16,7 @@
    ============================================================ */
 const DB = {};
 
-DB.BUILD = '1.12.0';
+DB.BUILD = '1.13.0';
 
 /* durata tipica delle sedute in minuti (per il calcolo del carico RPE×minuti) */
 DB.DURATE = { forza: 60, alta: 60, velocita: 50, resistenza: 45, attivazione: 25, recupero: 30 };
@@ -939,13 +939,9 @@ DB.CORSA_SALITA = {
     id: 'res_salita', nome: 'Resistenza — salita ripida 🏔',
     prog: { tipo: 'serie', base: 6, step: 1, max: 12, cosa: 'ripetute in salita ripida' },
     blocchi: liv => [
-      { titolo: 'Progressivi in salita', serie: 2, dettaglio: '40 m al 70% per entrare nel gesto e scaldare', recupero: 90,
-        come: [
-          'Due salite tranquille per abituare caviglie e polpacci alla pendenza forte.',
-          'Torna giù camminando.',
-        ] },
       { titolo: 'Balzi in salita', serie: 4, dettaglio: '20 m di balzi ampi alternando le gambe (mezza salita)', recupero: 120,
         come: [
+          'Prima di questi devi aver fatto il riscaldamento sulla salita che trovi in cima alla seduta: camminate, mobilità e 2 salite progressive.',
           'Non è corsa: sono balzi lunghi, un piede alla volta, come se volassi tra un appoggio e l\'altro.',
           'Braccia che accompagnano forte, atterri sull\'avampiede e riparti subito.',
           'Su 20 m ti verranno circa 10-14 balzi: contali, e cerca di farne SEMPRE MENO per coprire gli stessi metri.',
@@ -960,8 +956,13 @@ DB.CORSA_SALITA = {
           'Braccia che spingono, passo corto e frequente, sguardo avanti — mai ai piedi.',
           'Se crolli a metà serie, la volta dopo parti più controllato: meglio 8 ripetute uguali che 4 forti e 4 morte.',
         ] },
-      { titolo: 'Defaticamento in piano', serie: 1, dettaglio: '8 minuti di corsa blandissima sul piatto (circa 1,3-1,5 km) + camminata', recupero: 0,
-        come: ['Corsa lentissima per sciogliere le gambe dopo tutto il lavoro in salita.'] },
+      { titolo: 'Chiusura camminando', serie: 1, dettaglio: '3 giri su e giù per la salita CAMMINANDO piano, poi lo stretching qui sotto', recupero: 0,
+        come: [
+          'Qui non c\'è piano per il defaticamento di corsa: si chiude camminando, e va benissimo così.',
+          'Sali e scendi 3 volte a passo tranquillo, finché il fiato torna normale.',
+          'Poi lo stretching che trovi in fondo alla seduta, appoggiandoti alla macchina dove serve.',
+          'Il foam roller lo fai a casa: è la parte che ti fa arrivare sano alla prossima.',
+        ] },
     ],
   },
 };
@@ -1071,6 +1072,17 @@ DB.RISCALDAMENTI = {
     voci: [
       'Nessun riscaldamento necessario: la seduta è tutta a bassa intensità',
       'Inizia direttamente con la cyclette dolce',
+    ],
+  },
+  salita_ripida: {
+    nome: 'Riscaldamento sulla salita ripida (senza tratti piani)',
+    voci: [
+      'Sali e scendi la salita CAMMINANDO a passo svelto, 3 volte: è il tuo riscaldamento generale, il piano non serve',
+      'Mobilità sul posto (in fondo o in cima): 10 cerchi per caviglia, 10 slanci per gamba avanti-dietro, 10 slanci laterali',
+      'Squat a corpo libero 2×10 e affondi 8 per gamba, fermo sul posto',
+      'Skip basso e calciata sul posto: 2×20" ciascuno',
+      '2 salite di CORSA progressive: la prima al 50-60%, la seconda al 70%. Scendi sempre camminando',
+      'Solo adesso sei pronto per i balzi e le ripetute',
     ],
   },
   pioggia: {
