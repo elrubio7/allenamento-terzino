@@ -294,7 +294,8 @@ E.risolviSeduta = function (iso) {
   if (g.tipo === 'partita') { vm.partita = true; vm.minuti = g.minuti || null; return vm; }
 
   if (g.tipo === 'velocita' || g.tipo === 'resistenza') {
-    const lavoro = g.pioggia ? DB.CORSA_PIOGGIA[g.tipo] : DB.CORSA[g.tipo][eff.chiave];
+    const lavoro = g.pioggia ? DB.CORSA_PIOGGIA[g.tipo]
+      : (g.salita ? DB.CORSA_SALITA[g.tipo] : DB.CORSA[g.tipo][eff.chiave]);
     const st = E.statoCorsa(lavoro.id);
     const livMax = E.livMaxCorsa(lavoro.prog);
     const liv = Math.min(st.livello, livMax);
@@ -306,6 +307,7 @@ E.risolviSeduta = function (iso) {
     vm.consolidamento = st.consolidamento;
     vm.progressioneCorsa = { liv, livMax, prog: lavoro.prog, ritmo };
     if (g.pioggia) { vm.luogo = 'garage'; vm.nome = meta.nome + ' 🌧'; }
+    else if (g.salita) { vm.salita = true; vm.nome = meta.nome + ' 🏔'; }
     /* giornata test: il test SOSTITUISCE il lavoro normale (niente blocchi, niente progressione) */
     if (g.test || g.testFatto) { vm.soloTest = true; vm.blocchi = []; }
     return vm;
@@ -477,7 +479,7 @@ E.generaSettimana = function (tipo, partite, lun, comeProssima) {
     giorni[iso] = {
       tipo: assegna[iso] || 'recupero',
       stato: iso < oggi ? 'passato' : 'da_fare',
-      pioggia: false, test: null, spunte: {}, risultato: null, kickoff: null,
+      pioggia: false, salita: false, test: null, spunte: {}, risultato: null, kickoff: null,
     };
   }
 
@@ -504,7 +506,7 @@ E.swap = function (a, b) {
   const gg = S.data.settimana.giorni;
   if (!gg[a] || !gg[b]) return false;
   if (gg[a].tipo === 'partita' || gg[b].tipo === 'partita') return false;
-  const campi = ['tipo', 'pioggia', 'test', 'testFatto', 'spunte', 'kickoff'];
+  const campi = ['tipo', 'pioggia', 'salita', 'test', 'testFatto', 'spunte', 'kickoff'];
   for (const c of campi) { const t = gg[a][c]; gg[a][c] = gg[b][c]; gg[b][c] = t; }
   S.save();
   return true;
@@ -533,7 +535,30 @@ E.oggiNonPosso = function (iso) {
 
 E.setPioggia = function (iso, val) {
   const g = S.data.settimana.giorni[iso];
-  if (g && (g.tipo === 'velocita' || g.tipo === 'resistenza')) { g.pioggia = !!val; S.save(); }
+  if (g && (g.tipo === 'velocita' || g.tipo === 'resistenza')) {
+    g.pioggia = !!val;
+    if (val) g.salita = false;   /* se piove, la salita salta */
+    S.save();
+  }
+};
+
+/* 🏔 salita: corta e a piedi nei giorni di velocità, lunga (in macchina) nei giorni di resistenza */
+E.setSalita = function (iso, val) {
+  const g = S.data.settimana.giorni[iso];
+  if (g && (g.tipo === 'velocita' || g.tipo === 'resistenza')) {
+    g.salita = !!val;
+    if (val) g.pioggia = false;
+    S.save();
+  }
+};
+
+/* promemoria: la salita lunga rende se la fai ogni 2-3 settimane, non di più */
+E.consigliaSalitaLunga = function (iso) {
+  const g = S.data.settimana && S.data.settimana.giorni[iso];
+  if (!g || g.tipo !== 'resistenza' || g.stato !== 'da_fare' || g.salita || g.pioggia) return false;
+  const ultima = S.data.ultimaSalitaLunga;
+  if (!ultima) return S.data.storico.length >= 6;   /* non alle primissime sedute */
+  return U.diffDays(ultima, iso) >= 18;
 };
 
 E.setSpunta = function (iso, slot, serie, val) {
@@ -674,13 +699,15 @@ E.completaSeduta = function (iso) {
 
   /* test rimasto non salvato: lo si toglie dal giorno, tornerà nel prossimo giorno utile */
   if (g.test) g.test = null;
+  /* salita lunga fatta: riparte il conto per il promemoria */
+  if (vm.corsaId === 'res_salita') S.data.ultimaSalitaLunga = iso;
 
   g.stato = 'fatta';
   g.risultato = migliorie;
 
   S.data.storico.unshift({
     data: iso, completata: oggi, tipo: vm.tipo,
-    nome: vm.nome + (vm.pioggia ? ' 🌧' : ''), fase: vm.faseNome, dettagli,
+    nome: vm.nome, fase: vm.faseNome, dettagli,   /* il nome porta già 🌧 o 🏔 */
   });
 
   /* avanzamento di fase: ogni 3 sedute di forza gambe piene

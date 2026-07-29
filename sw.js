@@ -1,6 +1,6 @@
 'use strict';
 /* Service worker: dopo il primo caricamento l'app funziona senza internet. */
-const VERSIONE = 'terzino-1.9.0';
+const VERSIONE = 'terzino-1.10.0';
 const FILES = [
   './',
   './index.html',

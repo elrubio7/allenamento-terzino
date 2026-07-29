@@ -96,6 +96,7 @@ h2, h3 { text-transform: uppercase; letter-spacing: .03em; }
 .chip-saltata { border-color: var(--muto); color: var(--muto); }
 .chip-test { border-color: var(--azzurro); color: var(--azzurro); }
 .chip-pioggia { border-color: var(--azzurro); color: var(--azzurro); }
+.chip-salita { border-color: var(--arancio); color: var(--arancio); }
 .chip-luogo { color: var(--muto); }
 .chip-consolida { border-color: var(--giallo); color: var(--giallo); }
 .chip-fastidio { border-color: var(--rosso); color: var(--rosso); }

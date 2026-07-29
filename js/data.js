@@ -12,10 +12,11 @@
      landmine artigianale, ab roller, glute band, foam roller, cyclette (res. 1-8)
    - gym ball (fitball): leg curl femorali, stir the pot, core
    - strada: scaletta, paracadute, coni, panchine di marmo
+   - salite: una corta e dolce a piedi (sprint), una lunga in macchina (ripetute)
    ============================================================ */
 const DB = {};
 
-DB.BUILD = '1.9.0';
+DB.BUILD = '1.10.0';
 
 /* durata tipica delle sedute in minuti (per il calcolo del carico RPE×minuti) */
 DB.DURATE = { forza: 60, alta: 60, velocita: 50, resistenza: 45, attivazione: 25, recupero: 30 };
@@ -899,6 +900,54 @@ DB.CORSA = {
           come: ['3\' di recupero camminando, poi identico al blocco 1: stessi coni, stesso ritmo.'] },
       ],
     },
+  },
+};
+
+/* Versione SALITA 🏔 — si attiva col tasto sulla seduta di strada.
+   Velocità → la salita corta e dolce vicino casa (a piedi): lo sprint più sicuro che esista.
+   Resistenza → la salita lunga (in macchina): motore e gambe che non mollano.   */
+DB.CORSA_SALITA = {
+  velocita: {
+    id: 'vel_salita', nome: 'Velocità — sprint in salita 🏔',
+    prog: { tipo: 'serie', base: 6, step: 1, max: 12, cosa: 'sprint in salita' },
+    blocchi: liv => [
+      { titolo: 'Progressivi in salita', serie: 2, dettaglio: 'Due salite al 70-80% per prendere le misure e scaldare le caviglie', recupero: 90,
+        come: [
+          'Non sono sprint: servono a entrare nel gesto e a capire dove arrivi con la pendenza.',
+          'Busto inclinato avanti, ginocchia che salgono, passo corto e frequente.',
+          'Torna giù camminando con calma.',
+        ] },
+      { titolo: 'Sprint in salita', serie: 6 + liv, dettaglio: '30-40 m al MASSIMO. Si torna giù sempre camminando', recupero: 120,
+        come: [
+          'Pendenza dolce (5-10%): la tua va benissimo così, non serve che sia ripida — anzi.',
+          'Partenza da fermo, busto ben inclinato avanti, primi appoggi corti e potenti.',
+          'Spingi al massimo per 30-40 metri: in salita non riesci fisicamente a "strappare" i femorali, per questo è lo sprint più sicuro che esista.',
+          'Torna giù SEMPRE camminando: correre in discesa è l\'unico vero rischio di questo lavoro.',
+          'Se rallenti vistosamente rispetto ai primi, chiudi lì: qui conta la qualità, non il numero.',
+        ] },
+      { titolo: 'Allunghi in piano', serie: 3, dettaglio: '80 m sciolti in piano: dopo la salita le gambe girano leggere', recupero: 90,
+        come: [
+          'Torna sul piatto e corri 3 allunghi ampi e rilassati all\'80%.',
+          'È l\'effetto contrasto: dopo la salita ti senti leggero e la falcata torna lunga.',
+          'Non sono sprint: devi sentirti elegante, non affaticato.',
+        ] },
+    ],
+  },
+  resistenza: {
+    id: 'res_salita', nome: 'Resistenza — salita lunga 🏔',
+    prog: { tipo: 'serie', base: 4, step: 1, max: 8, cosa: 'ripetute lunghe' },
+    blocchi: liv => [
+      { titolo: 'Ripetute in salita lunga', serie: 4 + liv, dettaglio: '2 minuti in salita a ritmo tosto e costante, poi scendi camminando o trottando fino al via', recupero: 150,
+        come: [
+          'Ti serve un tratto che ti tenga in salita per almeno 2 minuti di corsa.',
+          'Ritmo tosto ma COSTANTE (circa 85%): devi arrivare in cima potendo ripetere, non stremato.',
+          'Braccia che spingono, passo corto e frequente, sguardo avanti — mai ai piedi.',
+          'La discesa È il recupero: torna giù camminando o trottando piano, senza fretta.',
+          'Se l\'ultima ripetuta è molto più lenta della prima, la volta dopo parti più controllato.',
+        ] },
+      { titolo: 'Defaticamento in piano', serie: 1, dettaglio: '6-8 minuti di corsa blanda in piano + camminata', recupero: 0,
+        come: ['Corsa lentissima per sciogliere le gambe dopo tutto il lavoro in salita.'] },
+    ],
   },
 };
 

@@ -198,6 +198,20 @@
         UI.renderSeduta();
         break;
       }
+      case 'salita': {
+        const g = S.data.settimana.giorni[iso];
+        const acceso = !g.salita;
+        E.setSalita(iso, acceso);
+        g.spunte = {};
+        S.save();
+        UI.renderSeduta();
+        if (acceso) {
+          UI.toast(g.tipo === 'velocita'
+            ? '🏔 Sprint in salita: lo sprint più sicuro che c\'è. Si torna giù sempre camminando.'
+            : '🏔 Salita lunga: ritmo tosto ma costante, la discesa è il recupero.');
+        }
+        break;
+      }
       case 'swap-apri': UI.swapInCorso = !UI.swapInCorso; UI.renderSeduta(); break;
       case 'swap-con':
         if (E.swap(iso, el.dataset.iso)) {
