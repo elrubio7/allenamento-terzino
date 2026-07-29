@@ -126,7 +126,7 @@ const UI = {
     let extra = '';
     if (g.test) extra += '<span class="chip chip-test">' + DB.TEST[g.test].icona + ' ' + U.esc(DB.TEST[g.test].nome) + '</span>';
     if (g.pioggia) extra += '<span class="chip chip-pioggia">🌧 versione garage</span>';
-    if (g.salita) extra += '<span class="chip chip-salita">🏔 ' + (g.tipo === 'velocita' ? 'sprint in salita' : 'salita lunga') + '</span>';
+    if (g.salita) extra += '<span class="chip chip-salita">🏔 ' + (g.tipo === 'velocita' ? 'sprint in salita' : 'salita ripida') + '</span>';
     let risultato = '';
     if (g.stato === 'fatta' && g.risultato && g.risultato.length) {
       risultato = '<div class="card-migliorie">' +
@@ -364,14 +364,14 @@ const UI = {
       if (vm.tipo === 'velocita' || vm.tipo === 'resistenza') {
         html += '<button class="btn-azione ' + (vm.pioggia ? 'attivo' : '') + '" data-action="pioggia">🌧 ' + (vm.pioggia ? 'torna in strada' : 'piove: versione garage') + '</button>' +
           '<button class="btn-azione ' + (vm.salita ? 'attivo' : '') + '" data-action="salita">🏔 ' +
-          (vm.salita ? 'torna in piano' : (vm.tipo === 'velocita' ? 'vado in salita' : 'salita lunga')) + '</button>';
+          (vm.salita ? 'torna in piano' : (vm.tipo === 'velocita' ? 'salita dolce (25 m)' : 'salita ripida (40 m)')) + '</button>';
       }
       html += '<button class="btn-azione" data-action="swap-apri">🔀 sposta</button>' +
         '<button class="btn-azione" data-action="non-posso">🚫 oggi non posso</button></div>';
       if (UI.swapInCorso) html += UI.swapScelta(iso);
-      /* promemoria: la salita lunga rende se torna ogni 2-3 settimane */
-      if (E.consigliaSalitaLunga(iso)) {
-        html += '<div class="banner banner-info">🏔 Sono passate più di due settimane dall\'ultima salita lunga: se oggi hai modo di prendere la macchina, è la giornata giusta.' +
+      /* promemoria: la salita ripida rende se torna ogni 2-3 settimane */
+      if (E.consigliaSalitaRipida(iso)) {
+        html += '<div class="banner banner-info">🏔 Sono passate più di due settimane dall\'ultima salita ripida: se oggi hai modo di prendere la macchina, è la giornata giusta.' +
           '<button class="btn-azione" data-action="salita">Passa alla salita</button></div>';
       }
       if (!vm.soloTest) html += '<button class="btn-primario btn-guida" data-action="guida-avvia">▶ Inizia seduta guidata</button>';

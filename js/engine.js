@@ -552,11 +552,12 @@ E.setSalita = function (iso, val) {
   }
 };
 
-/* promemoria: la salita lunga rende se la fai ogni 2-3 settimane, non di più */
-E.consigliaSalitaLunga = function (iso) {
+/* promemoria: la salita ripida rende se la fai ogni 2-3 settimane, non di più
+   (ed è quella per cui serve la macchina) */
+E.consigliaSalitaRipida = function (iso) {
   const g = S.data.settimana && S.data.settimana.giorni[iso];
   if (!g || g.tipo !== 'resistenza' || g.stato !== 'da_fare' || g.salita || g.pioggia) return false;
-  const ultima = S.data.ultimaSalitaLunga;
+  const ultima = S.data.ultimaSalitaRipida;
   if (!ultima) return S.data.storico.length >= 6;   /* non alle primissime sedute */
   return U.diffDays(ultima, iso) >= 18;
 };
@@ -699,8 +700,8 @@ E.completaSeduta = function (iso) {
 
   /* test rimasto non salvato: lo si toglie dal giorno, tornerà nel prossimo giorno utile */
   if (g.test) g.test = null;
-  /* salita lunga fatta: riparte il conto per il promemoria */
-  if (vm.corsaId === 'res_salita') S.data.ultimaSalitaLunga = iso;
+  /* salita ripida fatta: riparte il conto per il promemoria */
+  if (vm.corsaId === 'res_salita') S.data.ultimaSalitaRipida = iso;
 
   g.stato = 'fatta';
   g.risultato = migliorie;

@@ -207,8 +207,8 @@
         UI.renderSeduta();
         if (acceso) {
           UI.toast(g.tipo === 'velocita'
-            ? '🏔 Sprint in salita: lo sprint più sicuro che c\'è. Si torna giù sempre camminando.'
-            : '🏔 Salita lunga: ritmo tosto ma costante, la discesa è il recupero.');
+            ? '🏔 Salita dolce: sprint da 25 m al massimo, si torna giù sempre camminando.'
+            : '🏔 Salita ripida: balzi e ripetute da 40 m, recupero corto. Serve la macchina.');
         }
         break;
       }

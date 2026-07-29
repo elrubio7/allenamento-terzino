@@ -29,7 +29,7 @@ const S = {
       note: {},                 // exId → nota tecnica personale
       ultimoBackup: null,       // data dell'ultimo export (per il promemoria)
       ultimoScarico: null,      // lunedì dell'ultima settimana di scarico
-      ultimaSalitaLunga: null,  // data dell'ultima seduta di salita lunga (serve al promemoria)
+      ultimaSalitaRipida: null, // data dell'ultima seduta di salita ripida (serve al promemoria)
     };
   },
 

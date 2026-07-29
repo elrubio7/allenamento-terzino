@@ -18,7 +18,7 @@
 - Scaletta agilità, paracadute da sprint, coni
 - Panchine di marmo (step-up, piegamenti, dip, salti)
 - Strada per corsa, sprint, ripetute e test
-- **Salite**: una corta e poco ripida raggiungibile a piedi (sprint in salita) e una lunga a cui si arriva in macchina (ripetute lunghe). Si attivano col tasto 🏔 sulle sedute di strada; la salita lunga viene ricordata ogni 2-3 settimane.
+- **Salite** (entrambe brevi): una **dolce da ~25 m** raggiungibile a piedi (sprint di accelerazione, giorni di velocità) e una **ripida da ~40 m** a cui si arriva in macchina (balzi e ripetute con recupero corto, giorni di resistenza). Si attivano col tasto 🏔 sulle sedute di strada; la salita ripida viene ricordata ogni 2-3 settimane.
 
 **Regola fissa: garage e strada mai lo stesso giorno.** Eccezioni volute: la scaletta al coperto se piove, la cyclette come sostituto della strada col tasto 🌧.
 
