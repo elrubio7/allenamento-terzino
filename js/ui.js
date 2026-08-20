@@ -126,6 +126,7 @@ const UI = {
     let extra = '';
     if (g.test) extra += '<span class="chip chip-test">' + DB.TEST[g.test].icona + ' ' + U.esc(DB.TEST[g.test].nome) + '</span>';
     if (g.pioggia) extra += '<span class="chip chip-pioggia">🌧 versione garage</span>';
+    if (g.caldo) extra += '<span class="chip chip-caldo">🔥 ritmi da caldo</span>';
     if (g.salita) extra += '<span class="chip chip-salita">🏔 ' + (g.tipo === 'velocita' ? 'sprint in salita' : 'salita ripida') + '</span>';
     let risultato = '';
     if (g.stato === 'fatta' && g.risultato && g.risultato.length) {
@@ -361,6 +362,7 @@ const UI = {
       '<div><h2>' + vm.icona + ' ' + U.esc(vm.nome) + '</h2>' +
       '<p class="seduta-sub">' + U.fmtData(iso) +
       ' · <span class="chip chip-luogo">' + (vm.luogo === 'garage' ? '🏠 garage' : vm.luogo === 'strada' ? '🛣️ strada' : '🏟️ campo') + '</span>' +
+      (vm.md ? ' · <span class="chip chip-md" title="Giorni dalla partita, come nei club professionistici">' + vm.md + '</span>' : '') +
       (vm.partita ? '' : ' · <span class="chip" style="border-color:' + vm.faseColore + '">' + U.esc(vm.faseNome) + '</span>') +
       '</p></div></div>';
 
@@ -370,7 +372,8 @@ const UI = {
     if (vm.stato === 'da_fare') {
       html += '<div class="seduta-azioni">';
       if (vm.tipo === 'velocita' || vm.tipo === 'resistenza') {
-        html += '<button class="btn-azione ' + (vm.pioggia ? 'attivo' : '') + '" data-action="pioggia">🌧 ' + (vm.pioggia ? 'torna in strada' : 'piove: versione garage') + '</button>';
+        html += '<button class="btn-azione ' + (vm.pioggia ? 'attivo' : '') + '" data-action="pioggia">🌧 ' + (vm.pioggia ? 'torna in strada' : 'piove: versione garage') + '</button>' +
+          '<button class="btn-azione ' + (vm.caldo ? 'attivo' : '') + '" data-action="caldo">🔥 ' + (vm.caldo ? 'torna ai ritmi normali' : 'fa caldo') + '</button>';
       }
       html += '<button class="btn-azione" data-action="swap-apri">🔀 sposta</button>' +
         '<button class="btn-azione" data-action="non-posso">🚫 oggi non posso</button></div>';
@@ -416,6 +419,12 @@ const UI = {
     } else if (vm.testFatto) {
       html += '<div class="seduta-congelata"><h3>' + DB.TEST[vm.testFatto].icona + ' Test salvato ✓</h3>' +
         '<p>' + U.esc(DB.TEST[vm.testFatto].nome) + ': risultati registrati, li trovi in PROGRESSI.</p></div>';
+    }
+
+    /* giornata calda: obiettivi già ricalibrati + piano di idratazione */
+    if (vm.caldo) {
+      html += '<details class="dettagli-box box-caldo" open><summary>🔥 ' + U.esc(DB.CALDO.nome) + '</summary><ul>' +
+        DB.CALDO.voci.map(v => '<li>' + U.esc(v) + '</li>').join('') + '</ul></details>';
     }
 
     /* riscaldamento (unico: cambia con pioggia e con la salita ripida) */
@@ -567,7 +576,9 @@ const UI = {
 
   bloccoPartita(iso, vm) {
     const g = S.data.settimana.giorni[iso];
-    let html = '<div class="card-partita"><h3>⚽ Giorno della partita</h3>' +
+    let html = '<details class="dettagli-box box-riscaldamento" open><summary>🔥 ' + U.esc(DB.RISCALDAMENTI.partita.nome) + '</summary><ol>' +
+      DB.RISCALDAMENTI.partita.voci.map(v => '<li>' + U.esc(v) + '</li>').join('') + '</ol></details>' +
+      '<div class="card-partita"><h3>⚽ Giorno della partita</h3>' +
       '<p>Inserisci l\'orario del calcio d\'inizio: l\'app calcola a ritroso spuntini e acqua.</p>' +
       '<div class="kickoff-riga"><label for="kickoff">Calcio d\'inizio</label>' +
       '<input type="time" id="kickoff" step="300" value="' + (vm.kickoff || '') + '"></div>';
@@ -661,7 +672,7 @@ const UI = {
      ============================================================ */
   prepTipo: 'forza',
   vistaPrep() {
-    const tipi = [['forza', '🏋️'], ['alta', '💪'], ['velocita', '⚡'], ['resistenza', '🏃'], ['attivazione', '🔥'], ['recupero', '🌿']];
+    const tipi = [['partita', '⚽'], ['forza', '🏋️'], ['alta', '💪'], ['velocita', '⚡'], ['resistenza', '🏃'], ['attivazione', '🔥'], ['recupero', '🌿']];
     let html = '<h2 class="titolo-tab">Riscaldamento e mobilità</h2><p class="sub-tab">Che seduta stai per fare?</p><div class="chips-riga">';
     for (const coppia of tipi) {
       html += '<button class="chip-btn ' + (UI.prepTipo === coppia[0] ? 'attivo' : '') + '" data-action="prep-tipo" data-tipo="' + coppia[0] + '">' + coppia[1] + ' ' + U.esc(DB.SEDUTE[coppia[0]].nome) + '</button>';
@@ -675,7 +686,7 @@ const UI = {
       DB.MOBILITA.voci.map(v => '<li>' + U.esc(v) + '</li>').join('') + '</ol></div>';
 
     const st = DB.STRETCHING[UI.prepTipo];
-    html += '<div class="card-prep"><h3>🧘 ' + U.esc(st.nome) + '</h3><ol>' + st.voci.map(v => '<li>' + U.esc(v) + '</li>').join('') + '</ol></div>';
+    if (st) html += '<div class="card-prep"><h3>🧘 ' + U.esc(st.nome) + '</h3><ol>' + st.voci.map(v => '<li>' + U.esc(v) + '</li>').join('') + '</ol></div>';
     return html;
   },
 

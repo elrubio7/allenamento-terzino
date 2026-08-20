@@ -291,6 +291,17 @@ E.risolviSeduta = function (iso) {
   const pront = E.prontezzaDi(iso);
   vm.prontezza = pront ? pront.livello : null;
 
+  /* etichetta MD, come nei club: MD-2 = due giorni alla partita, MD+1 = il giorno dopo */
+  const partiteSet = set.partite || [];
+  if (partiteSet.length) {
+    let vicino = null;
+    for (const p of partiteSet) {
+      const d = U.diffDays(iso, p);
+      if (vicino === null || Math.abs(d) < Math.abs(vicino)) vicino = d;
+    }
+    vm.md = vicino === 0 ? 'MD' : (vicino > 0 ? 'MD-' + vicino : 'MD+' + (-vicino));
+  }
+
   if (g.tipo === 'partita') { vm.partita = true; vm.minuti = g.minuti || null; return vm; }
 
   if (g.tipo === 'velocita' || g.tipo === 'resistenza') {
@@ -301,9 +312,18 @@ E.risolviSeduta = function (iso) {
     const liv = Math.min(st.livello, livMax);
     let ritmo = null;
     if (lavoro.prog.tipo === 'ritmo') ritmo = E.valoreRitmo(lavoro.prog, liv);
+    /* caldo: gli obiettivi si abbassano prima di essere scritti nella seduta */
+    if (g.caldo && ritmo != null) ritmo = lavoro.prog.crescente ? ritmo - 3 : ritmo + 4;
     vm.corsaId = lavoro.id;
     vm.corsaNome = lavoro.nome;
     vm.blocchi = lavoro.blocchi(liv, ritmo);
+    if (g.caldo) {
+      vm.caldo = true;
+      /* una ripetuta in meno sui blocchi lunghi; sprint massimali e blocchi corti restano */
+      vm.blocchi = vm.blocchi.map(b => (b.serie && b.serie >= 4)
+        ? Object.assign({}, b, { serie: b.serie - 1 })
+        : b);
+    }
     vm.consolidamento = st.consolidamento;
     vm.progressioneCorsa = { liv, livMax, prog: lavoro.prog, ritmo };
     if (g.pioggia) { vm.luogo = 'garage'; vm.nome = meta.nome + ' 🌧'; }
@@ -435,9 +455,15 @@ E.generaSettimana = function (tipo, partite, lun, comeProssima) {
     let i = 0;
     for (const iso of liberi()) assegna[iso] = coda[Math.min(i++, coda.length - 1)];
   } else if (partite.length) {
-    /* Ogni seduta si prende il giorno che le sta meglio rispetto alla partita.
-       Il riposo è ciò che avanza alla fine, mai il ripiego di un posto non trovato. */
+    /* Disposizione secondo il modello dei club professionistici (microciclo MD):
+       MD+1/+2 leggeri · MD-4 forza · MD-3 resistenza · MD-2 velocità · MD-1 attivazione.
+       Negli studi su Premier League e academy europee il lavoro fisico si concentra
+       su MD-4 e MD-3 e la velocità cade su MD-2. La parte alta, che non affatica
+       le gambe, sta bene subito dopo la partita (MD-5, cioè 2 giorni dopo).
+       Ogni seduta cerca il suo giorno ideale: funziona con QUALUNQUE giorno di gara. */
     const distGara = iso => Math.min(...partite.map(p => Math.abs(U.diffDays(iso, p))));
+    const MD_IDEALE = { forza: 4, resistenza: 3, velocita: 2, alta: 5 };
+    const PESO_SCARTO = { forza: 10, resistenza: 8, velocita: 10, alta: 3 };
     const daCollocare = partite.length >= 2
       ? ['alta', 'velocita', 'forza', 'resistenza']   /* settimana fitta: prima le cose sicure */
       : ['forza', 'velocita', 'resistenza', 'alta'];
@@ -446,18 +472,11 @@ E.generaSettimana = function (tipo, partite, lun, comeProssima) {
       let scelto = null, migliorPunteggio = -Infinity;
       for (const iso of liberi()) {
         const d = distGara(iso);
-        let punti;
-        if (t === 'forza') {
-          punti = 50 + d * 10;                        /* il più lontano possibile dalla gara */
-        } else if (t === 'velocita') {
-          const primaDellaGara = partite.some(p => U.diffDays(iso, p) > 0);
-          punti = 60 - Math.abs(d - 2) * 5 + (primaDellaGara ? 5 : 0);  /* ideale: 2 giorni prima */
-        } else if (t === 'resistenza') {
-          punti = 40 + d * 3;
-        } else {
-          punti = 30 + (d <= 1 ? 5 : 0);              /* parte alta: sta bene ovunque, anche vicino */
-        }
-        if (t !== 'alta' && d < 2) punti -= 1000;     /* gambe mai attaccate alla partita */
+        let punti = 70 - Math.abs(d - MD_IDEALE[t]) * PESO_SCARTO[t];
+        /* la velocità sta meglio PRIMA della gara (è il classico MD-2) */
+        if (t === 'velocita' && partite.some(p => U.diffDays(iso, p) > 0)) punti += 5;
+        /* gambe mai attaccate alla partita; la parte alta invece può starci */
+        if (t !== 'alta' && d < 2) punti -= 1000;
         /* garage e strada si alternano: niente due giorni di strada di fila */
         if (DB.SEDUTE[t].luogo === 'strada') {
           for (const vicino of [U.addDays(iso, -1), U.addDays(iso, 1)]) {
@@ -479,7 +498,7 @@ E.generaSettimana = function (tipo, partite, lun, comeProssima) {
     giorni[iso] = {
       tipo: assegna[iso] || 'recupero',
       stato: iso < oggi ? 'passato' : 'da_fare',
-      pioggia: false, salita: false, test: null, spunte: {}, risultato: null, kickoff: null,
+      pioggia: false, salita: false, caldo: false, test: null, spunte: {}, risultato: null, kickoff: null,
     };
   }
 
@@ -523,7 +542,7 @@ E.swap = function (a, b) {
   const gg = S.data.settimana.giorni;
   if (!gg[a] || !gg[b]) return false;
   if (gg[a].tipo === 'partita' || gg[b].tipo === 'partita') return false;
-  const campi = ['tipo', 'pioggia', 'salita', 'test', 'testFatto', 'spunte', 'kickoff'];
+  const campi = ['tipo', 'pioggia', 'salita', 'caldo', 'test', 'testFatto', 'spunte', 'kickoff'];
   for (const c of campi) { const t = gg[a][c]; gg[a][c] = gg[b][c]; gg[b][c] = t; }
   S.save();
   return true;
@@ -557,6 +576,12 @@ E.setPioggia = function (iso, val) {
     if (val) g.salita = false;   /* se piove, la salita salta */
     S.save();
   }
+};
+
+/* 🔥 caldo: obiettivi ricalibrati e piano di idratazione */
+E.setCaldo = function (iso, val) {
+  const g = S.data.settimana.giorni[iso];
+  if (g && (g.tipo === 'velocita' || g.tipo === 'resistenza')) { g.caldo = !!val; S.save(); }
 };
 
 /* 🏔 salita: corta e a piedi nei giorni di velocità, lunga (in macchina) nei giorni di resistenza */

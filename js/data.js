@@ -16,7 +16,7 @@
    ============================================================ */
 const DB = {};
 
-DB.BUILD = '1.13.0';
+DB.BUILD = '2.0.0';
 
 /* durata tipica delle sedute in minuti (per il calcolo del carico RPE×minuti) */
 DB.DURATE = { forza: 60, alta: 60, velocita: 50, resistenza: 45, attivazione: 25, recupero: 30 };
@@ -66,10 +66,9 @@ DB.ROTAZIONI = {
   spalle:     ['military_press', 'landmine_press'],
   braccia:    ['curl_ez', 'french_press'],
   unilaterale:['bulgaro', 'step_up'],
-  adduttori:  ['copenhagen', 'landmine_rotation'],
   femorali:   ['nordic_curl', 'gymball_leg_curl'],
   kettlebell: ['kb_swing', 'kb_stacco_monogamba'],
-  core_base:  ['ab_roller', 'alzate_ginocchia'],
+  core_base:  ['ab_roller', 'alzate_ginocchia', 'landmine_rotation'],
   core_forza: ['plank_zavorrato', 'gymball_stir'],
   trazioni:   ['trazioni_prona', 'trazioni_supina', 'trazioni_neutra'],
 };
@@ -140,7 +139,7 @@ DB.ESERCIZI = {
     ],
   },
   copenhagen: {
-    nome: 'Copenhagen plank', tipoCarico: 'corpo', rotazione: 'adduttori',
+    nome: 'Copenhagen plank', tipoCarico: 'corpo',
     recupero: 60,
     livelli: [
       { label: '3×15" per lato — ginocchio sulla panca', schema: { serie: 3, reps: 1, label: '3×15" per lato' } },
@@ -159,7 +158,7 @@ DB.ESERCIZI = {
     ],
   },
   landmine_rotation: {
-    nome: 'Landmine rotation', tipoCarico: 'bilanciere', landmine: true, rotazione: 'adduttori',
+    nome: 'Landmine rotation', tipoCarico: 'bilanciere', landmine: true, rotazione: 'core_base',
     start: 6, inc: 1, cap: 26, recupero: 60,
     schema: { serie: 3, reps: 8, label: '3×8 per lato' },
     esecuzione: [
@@ -585,7 +584,7 @@ DB.DETTAGLI = {
     errori: 'Darsi lo slancio con la gamba a terra: deve lavorare solo quella sopra la panca.',
   },
   copenhagen: {
-    perche: 'Gli adduttori sono il punto debole del terzino (cross, contrasti, cambi di direzione): questo li blinda.',
+    perche: 'Gli adduttori sono il punto debole del terzino (cross, contrasti, cambi di direzione). Lo trovi DUE volte a settimana perché gli studi mostrano effetto con 2-3 sedute settimanali per 8 settimane: una ogni tanto non serve a niente.',
     errori: 'Bacino che scende a metà serie: meglio fermarsi che tenere una posizione storta.',
   },
   landmine_rotation: {
@@ -719,7 +718,7 @@ DB.SEDUTE = {
     nome: 'Forza gambe', icona: '🏋️', luogo: 'garage',
     slots: [
       { ex: 'squat' }, { ex: 'stacco_rumeno' }, { ex: 'hip_thrust' },
-      { rot: 'unilaterale' }, { rot: 'adduttori' }, { rot: 'femorali' },
+      { rot: 'unilaterale' }, { ex: 'copenhagen' }, { rot: 'femorali' },
       { rot: 'kettlebell' }, { ex: 'polpacci' },
     ],
   },
@@ -728,7 +727,7 @@ DB.SEDUTE = {
     slots: [
       { rot: 'panca' }, { rot: 'trazioni' }, { ex: 'dip' },
       { rot: 'rematore' }, { rot: 'spalle' }, { rot: 'braccia' },
-      { core: true },
+      { core: true }, { ex: 'copenhagen' },
     ],
   },
   velocita:   { nome: 'Velocità', icona: '⚡', luogo: 'strada' },
@@ -790,11 +789,12 @@ DB.CORSA = {
             'Ultimi 20 m: al 90%, spalle basse e viso rilassato (se digrigni i denti sei troppo teso).',
             'Non è uno sprint secco: è imparare ad accelerare con tecnica pulita.',
           ] },
-        { titolo: 'Allunghi', serie: 3, dettaglio: '80 m al 75-80%, sciolti e ampi', recupero: 90,
+        { titolo: 'Sprint massimali in piano', serie: 2, dettaglio: '40 m al 100% in piano, recupero completo. È la dose settimanale che protegge i femorali', recupero: 180,
           come: [
-            'Circa 100 passi normali di distanza, su tratto piano.',
-            'Corri "grande": falcata ampia, ginocchia che salgono, braccia sciolte.',
-            'Il ritmo è controllato: devi sentirti elegante, non affaticato.',
+            'Questi non si saltano mai: la ricerca dice che chi sprinta almeno una volta a settimana oltre il 95% della velocità massima si stira molto meno.',
+            'Parti da fermo e vai crescendo: la velocità massima vera arriva dopo i 20-25 m, per questo servono 40 m.',
+            'Recupero COMPLETO (3\'): senza freschezza non raggiungi la velocità che serve, e il lavoro non conta.',
+            'Bastano 2 sprint fatti bene: qui il volume non serve, serve la qualità.',
           ] },
       ],
     },
@@ -816,11 +816,12 @@ DB.CORSA = {
             'Il paracadute si apre da solo e ti frena: tu continua a spingere al massimo fino al cono.',
             'Recupero COMPLETO (3\'): lo sprint massimale funziona solo se sei fresco. Se rallenti vistosamente, fermati.',
           ] },
-        { titolo: 'Partenze varie', serie: 4, dettaglio: '20 m senza paracadute: partenza in piedi, seduto, prono, dopo giro su te stesso', recupero: 120,
+        { titolo: 'Sprint massimali in piano', serie: 3, dettaglio: '40 m al 100% SENZA paracadute, recupero completo. La dose settimanale di velocità vera', recupero: 180,
           come: [
-            'Togli il paracadute: ora sei "leggero" e veloce (è l\'effetto contrasto).',
-            'Serie 1: partenza in piedi normale. Serie 2: da seduto a terra. Serie 3: sdraiato a pancia in giù. Serie 4: giro su te stesso e via.',
-            'Simulano le partenze sporche della partita: reattività da qualsiasi posizione.',
+            'Togli il paracadute: ora sei "leggero" ed è il momento in cui vai più forte di tutta la settimana (effetto contrasto).',
+            'Non si saltano mai: sprintare oltre il 95% almeno una volta a settimana è ciò che protegge i femorali. Gli sprint resistiti da soli non bastano, perché la velocità massima non la raggiungi mai.',
+            'Recupero completo di 3\': senza freschezza non tocchi la velocità che serve.',
+            'Sull\'ultimo puoi variare la partenza (da seduto, prono, dopo un giro su te stesso) per simulare le partenze sporche della partita.',
           ] },
       ],
     },
@@ -828,15 +829,21 @@ DB.CORSA = {
       id: 'vel_potenza', nome: 'Velocità — RSA (sprint ripetuti da gara)',
       prog: { tipo: 'serie', base: 6, step: 1, max: 10, cosa: 'sprint per blocco' },
       blocchi: liv => [
-        { titolo: 'RSA — blocco 1', serie: 6 + liv, dettaglio: '40 m al massimo, poi torna camminando veloce: hai solo 20" tra gli sprint', recupero: 20,
+        { titolo: 'Sprint massimali in piano', serie: 2, dettaglio: '40 m al 100% da fresco, PRIMA dell\'RSA. Recupero completo', recupero: 180,
+          come: [
+            'Si fanno all\'inizio, quando sei fresco: nell\'RSA la velocità cala per la fatica, quindi lì non tocchi mai il massimo.',
+            'È la dose settimanale sopra il 95% che protegge i femorali: 2 sprint bastano.',
+            'Recupero completo di 3\' tra i due.',
+          ] },
+        { titolo: 'RSA — blocco 1', serie: 6 + liv, dettaglio: '40 m al massimo, poi torna camminando veloce: hai 25" tra gli sprint', recupero: 25,
           come: [
             'Due coni a 40 m (circa 50 passi normali).',
             'Sprint al massimo fino al cono, poi girati e torna camminando VELOCE verso il via.',
-            'Spunta la serie e riparti quando la pillola suona: 20" passano subito, è voluto.',
+            'Spunta la serie e riparti quando la pillola suona: 25" passano subito, è voluto. (Passando da 15" a 25" di recupero uno studio ha visto tempi migliori del 3% e un terzo di lattato in meno: stessa fatica, qualità più alta.)',
             'È l\'allenamento più simile alla partita: sprint ripetuti con recupero incompleto.',
             'Obiettivo: che l\'ultimo sprint sia veloce quasi quanto il primo.',
           ] },
-        { titolo: 'RSA — blocco 2', serie: 6 + liv, dettaglio: '40 m come il blocco 1, dopo 4\' di recupero completo', recupero: 20,
+        { titolo: 'RSA — blocco 2', serie: 6 + liv, dettaglio: '40 m come il blocco 1, dopo 4\' di recupero completo', recupero: 25,
           come: [
             'Prima di iniziare: 4\' di recupero vero (cammina, bevi un sorso).',
             'Poi identico al blocco 1: stessi 40 m, stessi 20" tra gli sprint.',
@@ -927,11 +934,12 @@ DB.CORSA_SALITA = {
           'Torna giù SEMPRE camminando: correre in discesa è l\'unico vero rischio di questo lavoro.',
           'Se rallenti vistosamente rispetto ai primi, chiudi lì: conta la qualità, non il numero.',
         ] },
-      { titolo: 'Allunghi in piano', serie: 3, dettaglio: '80 m all\'80% sul piatto, sciolti e ampi', recupero: 90,
+      { titolo: 'Sprint massimali in piano', serie: 3, dettaglio: '40 m al 100% sul piatto, recupero completo. Non si saltano: la salita da sola non basta', recupero: 180,
         come: [
-          '80 m sono circa 100 passi normali: usa due riferimenti fissi sulla strada.',
-          'È l\'effetto contrasto: dopo la salita ti senti leggero e la falcata torna lunga.',
-          'Non sono sprint: devi sentirti elegante, non affaticato.',
+          'In salita non raggiungi mai la velocità massima — è il motivo per cui è sicura, ma è anche il suo limite.',
+          'La ricerca è chiara: serve almeno un\'esposizione a settimana sopra il 95% della velocità massima, altrimenti il femorale non è pronto quando parti a tutta in partita.',
+          'Quindi si chiude sempre sul piatto: 40 m al massimo, con 3\' di recupero completo tra uno e l\'altro.',
+          'Dopo la salita ti sentirai leggerissimo: è l\'effetto contrasto, ed è il momento migliore della settimana per andare forte.',
         ] },
     ],
   },
@@ -1074,6 +1082,18 @@ DB.RISCALDAMENTI = {
       'Inizia direttamente con la cyclette dolce',
     ],
   },
+  partita: {
+    nome: 'Riscaldamento pre-partita (15 minuti, a bordo campo)',
+    voci: [
+      'Corsa progressiva 5\': primi 2\' pianissimo, poi sali fino a un trotto medio',
+      'Mobilità dinamica 3\': slanci gamba avanti-dietro e laterali 10 per gamba, affondi camminati 8 per gamba, aperture d\'anca 8 per lato',
+      'Attivazione 2\': skip basso, skip alto, calciata e corsa laterale — 20 m ciascuno',
+      'Progressivi: 3 × 40 m crescenti (70%, 85%, 95%)',
+      'Accelerazioni: 2 × 15 m al MASSIMO da fermo — questo è il pezzo che ti fa partire pronto',
+      'Ultimi 5\' prima del fischio: non stare fermo. Cammina, palleggia, qualche skip: il corpo deve restare caldo',
+      'È il protocollo che usano i professionisti prima di entrare — vale anche per il calcetto, ed è ciò che ti evita di sembrare lento nei primi 15 minuti',
+    ],
+  },
   salita_ripida: {
     nome: 'Riscaldamento sulla salita ripida (senza tratti piani)',
     voci: [
@@ -1094,6 +1114,24 @@ DB.RISCALDAMENTI = {
       'Squat a corpo libero: 2×10',
     ],
   },
+};
+
+/* ---------- CALDO 🔥 ----------
+   Sopra i 30° la distanza totale in partita cala del 5-10% e la corsa ad alta
+   intensità del 20-25%; chi non è acclimatato perde fino al 15%. Quindi si
+   abbassano gli obiettivi invece di sentirsi scarsi, e si beve con criterio. */
+DB.CALDO = {
+  nome: 'Giornata calda: come cambia la seduta',
+  voci: [
+    'Obiettivi già ricalibrati: ritmi più lenti di 4", distanze del 15-15 accorciate di 3 m, una ripetuta in meno nei blocchi lunghi',
+    'PRIMA — 500 ml di acqua nelle due ore precedenti, a sorsi (non tutta insieme)',
+    'DURANTE — 150-200 ml ogni 15-20 minuti, anche se non hai sete',
+    'DOPO — pesati prima e dopo: per ogni chilo perso bevi 1,5 litri nelle ore successive',
+    'Allenati presto la mattina o dopo le 19: tra le 12 e le 17 il caldo ti toglie il lavoro, non te lo dà',
+    'Maglia chiara e leggera, cappellino, e bagnati testa e nuca nei recuperi',
+    'Servono 10-14 giorni di esposizione per acclimatarti: le prime sedute saranno le peggiori, poi migliora',
+    'Se hai crampi, testa che pulsa o pelle d\'oca col caldo: chiudi la seduta. Non è debolezza, è il corpo che avvisa',
+  ],
 };
 
 DB.MOBILITA = {

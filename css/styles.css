@@ -97,6 +97,10 @@ h2, h3 { text-transform: uppercase; letter-spacing: .03em; }
 .chip-test { border-color: var(--azzurro); color: var(--azzurro); }
 .chip-pioggia { border-color: var(--azzurro); color: var(--azzurro); }
 .chip-salita { border-color: var(--arancio); color: var(--arancio); }
+.chip-caldo { border-color: var(--rosso); color: var(--rosso); }
+.chip-md { border-color: var(--viola); color: var(--viola); font-weight: 800; letter-spacing: .06em; }
+.box-caldo { border-left: 4px solid var(--rosso); }
+.box-riscaldamento { border-left: 4px solid var(--giallo); }
 .chip-luogo { color: var(--muto); }
 .chip-consolida { border-color: var(--giallo); color: var(--giallo); }
 .chip-fastidio { border-color: var(--rosso); color: var(--rosso); }

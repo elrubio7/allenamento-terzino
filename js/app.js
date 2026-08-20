@@ -198,6 +198,17 @@
         UI.renderSeduta();
         break;
       }
+      case 'caldo': {
+        const g = S.data.settimana.giorni[iso];
+        const acceso = !g.caldo;
+        E.setCaldo(iso, acceso);
+        g.spunte = {};
+        S.save();
+        UI.renderSeduta();
+        if (acceso) UI.toast('🔥 Obiettivi ricalibrati sul caldo: sopra i 30° la corsa ad alta intensità cala del 20-25%, non sei tu.');
+        break;
+      }
+
       /* la salita la programma l'app: questo è solo il ripiego quando non si può */
       case 'salita-no': {
         const g = S.data.settimana.giorni[iso];
