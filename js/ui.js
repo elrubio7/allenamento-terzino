@@ -687,6 +687,11 @@ const UI = {
     html += '<div class="card-prep evidenza"><h3>🧍 ' + U.esc(DB.MOBILITA.nome) + '</h3><p>' + U.esc(DB.MOBILITA.descr) + '</p><ol>' +
       DB.MOBILITA.voci.map(v => '<li>' + U.esc(v) + '</li>').join('') + '</ol></div>';
 
+    /* come misurare le distanze senza metro */
+    html += '<details class="card-prep misure"><summary><strong>📏 ' + U.esc(DB.MISURE.nome) + '</strong></summary>' +
+      '<p>' + U.esc(DB.MISURE.descr) + '</p><ul>' +
+      DB.MISURE.voci.map(v => '<li>' + U.esc(v) + '</li>').join('') + '</ul></details>';
+
     /* il profilo del ruolo: i numeri che spiegano perché il programma è così */
     html += '<details class="card-prep ruolo"><summary><strong>⚽ ' + U.esc(DB.RUOLO.nome) + '</strong></summary>' +
       '<p>' + U.esc(DB.RUOLO.descr) + '</p><ul>' +

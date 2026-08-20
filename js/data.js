@@ -16,7 +16,7 @@
    ============================================================ */
 const DB = {};
 
-DB.BUILD = '2.2.0';
+DB.BUILD = '2.3.0';
 
 /* durata tipica delle sedute in minuti (per il calcolo del carico RPE×minuti) */
 DB.DURATE = { forza: 60, alta: 60, velocita: 50, resistenza: 45, attivazione: 25, recupero: 30 };
@@ -780,9 +780,10 @@ DB.BLOCCO_SPRINT_MAX = function (serie) {
     recupero: 180,
     mSprint: 20,
     come: [
-      'Segna tre zone con i coni: 25 m di lancio, 20 m di sprint vero, 20 m per frenare in scioltezza.',
-      'Nel lancio sali gradualmente e RILASSATO: non è una partenza, è un avvicinamento. Devi entrare nella zona già veloce.',
-      'Nei 20 m centrali vai al massimo assoluto: busto alto, spalle sciolte, ginocchia che salgono. Cerca la frequenza dei passi, non il passo lungo.',
+      'COME PIAZZARE I CONI — quattro coni in fila: cono 1 (via), cammina ' + U.passi(25) + ' e metti il cono 2, altri ' + U.passi(20) + ' e metti il cono 3, altri ' + U.passi(20) + ' e metti il cono 4. Sono 25 m di lancio, 20 m di sprint, 20 m per frenare.',
+      'Nel lancio (cono 1 → cono 2) sali gradualmente e RILASSATO: non è una partenza, è un avvicinamento. Devi entrare al cono 2 già veloce.',
+      'Tra cono 2 e cono 3 (i 20 m centrali) vai al massimo assoluto: busto alto, spalle sciolte, ginocchia che salgono. Cerca la frequenza dei passi, non il passo lungo.',
+      'Dopo il cono 3 rallenta in scioltezza fino al cono 4: non frenare di colpo, quella è un\'altra esercitazione.',
       'Da fermo la velocità massima la sfiori appena; lanciato ci resti dentro per 20 metri — per questo i club allenano così la velocità pura.',
       'Recupero COMPLETO di 3\': è il lavoro più esigente per il sistema nervoso di tutta la settimana.',
       'È anche la dose settimanale sopra il 95% che protegge i femorali: non si salta mai.',
@@ -801,7 +802,7 @@ DB.BLOCCO_FRENATE = function (serie) {
     recupero: 90,
     mAlta: 20,
     come: [
-      'Metti due coni a 20 m e un terzo cono 5 m più avanti: devi fermarti COMPLETAMENTE dentro quei 5 metri.',
+      'COME PIAZZARE I CONI — cono 1 (via), cammina ' + U.passi(20) + ' e metti il cono 2, poi altri ' + U.passi(5) + ' e metti il cono 3. Acceleri da 1 a 2 e devi fermarti COMPLETAMENTE prima del cono 3 (hai solo 5 metri).',
       'È il gesto più impegnativo del calcio: si frena l\'80-100% in più di quanto si accelera, con forze fino a 2,7 volte più alte. Gli studi la chiamano il secondo "vaccino" contro gli infortuni, dopo lo sprint.',
       'Tecnica: negli ultimi appoggi accorcia e allarga i piedi, abbassa il baricentro, petto ALTO — non piegarti in avanti sulle punte.',
       'Alterna: metà frenate secche dritte, metà con cambio di direzione a 90° e ripartenza esplosiva.',
@@ -824,7 +825,7 @@ DB.CORSA = {
       blocchi: liv => [
         { titolo: 'Scaletta agilità', serie: 2, dettaglio: 'Un giro dei 4 schemi a serie sulla scaletta (circa 5 m): skip, doppio appoggio, laterale, dentro-fuori', recupero: 45,
           come: [
-            'Stendi la scaletta su un tratto piano e asciutto.',
+            'Qui non c\'è niente da misurare: la scaletta è lunga circa 5 m ed è già la tua distanza. Stendila su un tratto piano e asciutto.',
             'Schema 1 — SKIP: un appoggio per riquadro, ginocchia alte, braccia che pompano.',
             'Schema 2 — DOPPIO APPOGGIO: due appoggi rapidi per riquadro (dx-sx), busto alto.',
             'Schema 3 — LATERALE: avanzi di fianco, due appoggi per riquadro, poi torna con l\'altro fianco.',
@@ -840,10 +841,11 @@ DB.CORSA = {
           ] },
         { titolo: 'Accelerazioni progressive', serie: 5 + liv, dettaglio: '60 m l\'una: parti piano e arriva al 90% negli ultimi 20 m', recupero: 120, mAlta: 25,
           come: [
-            'Misura 60 m: due coni distanti 75 passi normali (o usa i lampioni come riferimento).',
-            'Primi 20 m: corsa facile, ampia e rilassata.',
-            'Secondi 20 m: aumenta gradualmente spinta e frequenza.',
-            'Ultimi 20 m: al 90%, spalle basse e viso rilassato (se digrigni i denti sei troppo teso).',
+            'COME MISURARE — due coni a ' + U.passi(60) + ' di distanza (60 m). In alternativa due lampioni: di solito distano 25-30 m, quindi due campate sono circa 60 m.',
+            'Dividi mentalmente in tre parti da ' + U.passi(20) + ' l\'una.',
+            'Primo terzo: corsa facile, ampia e rilassata.',
+            'Secondo terzo: aumenta gradualmente spinta e frequenza.',
+            'Ultimo terzo: al 90%, spalle basse e viso rilassato (se digrigni i denti sei troppo teso).',
             'Non è uno sprint secco: è imparare ad accelerare con tecnica pulita.',
           ] },
         DB.BLOCCO_SPRINT_MAX(3),
@@ -856,14 +858,15 @@ DB.CORSA = {
       blocchi: liv => [
         { titolo: 'Scaletta rapida', serie: 2, dettaglio: 'Un giro dei 3 schemi a serie sulla scaletta (circa 5 m), alla massima frequenza di appoggi', recupero: 45,
           come: [
+            'Niente da misurare: la scaletta (circa 5 m) è già la distanza.',
             'Skip, doppio appoggio e laterale: stavolta alla MASSIMA frequenza di piedi.',
             'Contatti a terra brevissimi, come su carboni ardenti.',
             'Se sbagli un riquadro non fermarti: la fluidità conta più della precisione oggi.',
           ] },
         { titolo: 'Sprint con paracadute', serie: 5 + liv, dettaglio: '30 m al 100% con paracadute. La qualità vale più della quantità: recupero completo', recupero: 180, mAlta: 30,
           come: [
-            'Allaccia la cintura del paracadute in vita, paracadute dietro di te a terra.',
-            'Misura 30 m con due coni (circa 38 passi normali).',
+            'Allaccia la cintura del paracadute in vita, paracadute dietro di te a terra, corda ben distesa.',
+            'COME MISURARE — due coni a ' + U.passi(30) + ' di distanza (30 m).',
             'Partenza in leggero affondo: spingi forte i primi 10 m con il busto inclinato avanti.',
             'Il paracadute si apre da solo e ti frena: tu continua a spingere al massimo fino al cono.',
             'Recupero COMPLETO (3\'): lo sprint massimale funziona solo se sei fresco. Se rallenti vistosamente, fermati.',
@@ -879,7 +882,7 @@ DB.CORSA = {
         DB.BLOCCO_SPRINT_MAX(3),
         { titolo: 'RSA — blocco 1', serie: 6 + liv, dettaglio: '40 m al massimo, poi torna camminando veloce: hai 25" tra gli sprint', recupero: 25, mSprint: 40,
           come: [
-            'Due coni a 40 m (circa 50 passi normali).',
+            'COME MISURARE — due coni a ' + U.passi(40) + ' di distanza (40 m).',
             'Sprint al massimo fino al cono, poi girati e torna camminando VELOCE verso il via.',
             'Spunta la serie e riparti quando la pillola suona: 25" passano subito, è voluto. (Passando da 15" a 25" di recupero uno studio ha visto tempi migliori del 3% e un terzo di lattato in meno: stessa fatica, qualità più alta.)',
             'È l\'allenamento più simile alla partita: sprint ripetuti con recupero incompleto.',
@@ -887,13 +890,14 @@ DB.CORSA = {
           ] },
         { titolo: 'RSA — blocco 2', serie: 6 + liv, dettaglio: '40 m come il blocco 1, dopo 4\' di recupero completo', recupero: 25, mSprint: 40,
           come: [
+            'Stessi coni del blocco 1 (40 m = ' + U.passi(40) + '): non spostare niente.',
             'Prima di iniziare: 4\' di recupero vero (cammina, bevi un sorso).',
-            'Poi identico al blocco 1: stessi 40 m, stessi 20" tra gli sprint.',
+            'Poi identico al blocco 1: stessi 40 m, stessi 25" tra gli sprint.',
           ] },
         DB.BLOCCO_FRENATE(4),
         { titolo: 'Navette con i coni', serie: 4, dettaglio: '10+20+10 m con cambi di senso sui coni', recupero: 90, mAlta: 40,
           come: [
-            'Tre coni in linea: A (via), B a 10 m, C a 30 m da A.',
+            'COME PIAZZARE I CONI — cono A (via), cammina ' + U.passi(10) + ' e metti il cono B, poi altri ' + U.passi(20) + ' e metti il cono C (quindi C sta a 30 m da A).',
             'Sprint A→B, tocca terra vicino al cono, inverti e vai B→C (20 m), inverti, chiudi C→B (10 m).',
             'Nel cambio di senso: frena con passi corti, scendi col baricentro, riparti basso.',
             'Sono i cambi di direzione violenti dei recuperi difensivi.',
@@ -908,14 +912,14 @@ DB.CORSA = {
       blocchi: (liv, ritmo) => [
         { titolo: 'Ripetute 400 m', serie: 5, dettaglio: '400 m in ' + U.fmtRitmo(ritmo) + ' l\'uno: spunta a ogni ripetuta, il timer ti dà i 90" di recupero', recupero: 90,
           come: [
-            'Misura i 400 m una volta sola col contachilometri del telefono (Google Maps o un\'app di corsa) e segnati i punti di inizio e fine: da lì in poi li riusi sempre.',
+            'COME MISURARE — 400 m sono circa ' + U.passi(400) + ', ma su questa distanza il conteggio a passi sbaglia troppo: misurali UNA volta col contachilometri del telefono (Google Maps o un\'app di corsa) e segnati due punti fissi (un cancello, un palo). Da lì in poi li riusi sempre.',
             'Parti col cronometro dell\'app (scheda TIMER) o del telefono: il tempo target è quello scritto sopra.',
             'Ritmo COSTANTE: non partire a razzo per poi morire. Sbagli di poco? Va bene: entro 3-4 secondi dal target.',
             'Spunta la ripetuta, il timer ti dà i 90": respira con le mani sopra la testa e riparti.',
             'Quando completi tutte le ripetute al ritmo giusto, la prossima volta il target scende di 2 secondi.',
           ] },
         { titolo: 'Defaticamento', serie: 1, dettaglio: '5\' di corsa blanda (circa 800-900 m) + camminata', recupero: 0,
-          come: ['Corsa lentissima, quasi camminata: il cuore scende gradualmente e le gambe si sciolgono.'] },
+          come: ['Vai a TEMPO, non a distanza: i metri indicati sono solo un\'idea di massima, non misurare niente.', 'Corsa lentissima, quasi camminata: il cuore scende gradualmente e le gambe si sciolgono.'] },
       ],
     },
     forza: {
@@ -925,13 +929,13 @@ DB.CORSA = {
         { titolo: 'Fartlek', serie: 8 + liv, dettaglio: '30" forte al 85-90% (circa 130-150 m), poi 90" piano: spunta a ogni tratto forte', recupero: 90, mAlta: 140,
           come: [
             'Scegli un percorso dove puoi correre libero, senza incroci.',
-            'Tratto FORTE: 30" all\'85-90% — un ritmo che potresti tenere per 2-3 minuti al massimo. Usa i lampioni o gli alberi come traguardi.',
+            'Tratto FORTE: 30" all\'85-90% — un ritmo che potresti tenere per 2-3 minuti al massimo. Sono circa 130-150 m, cioè ' + U.passi(140) + ': usa lampioni o alberi come traguardi invece di guardare l\'orologio.',
             'Spunta la serie: il timer ti dà 90" di corsa PIANO (non camminare: trotto leggero).',
             'È il ritmo-partita: strappi e rifiati, strappi e rifiati.',
             'L\'ultimo tratto forte deve assomigliare al primo: se crolli, il ritmo dei tratti forti era troppo alto.',
           ] },
         { titolo: 'Defaticamento', serie: 1, dettaglio: '5\' blandi (circa 800-900 m) + camminata', recupero: 0,
-          come: ['Trotto leggerissimo e camminata finale.'] },
+          come: ['Vai a TEMPO, non a distanza: i metri indicati sono solo un\'idea di massima.', 'Trotto leggerissimo e camminata finale.'] },
       ],
     },
     potenza: {
@@ -940,14 +944,14 @@ DB.CORSA = {
       blocchi: (liv, dist) => [
         { titolo: '15-15 — blocco 1', serie: 1, dettaglio: '8\' di: 15" di corsa coprendo ' + dist + ' m / 15" fermo o camminando. Usa i coni per misurare la distanza', recupero: 180, mAlta: dist * 16,
           come: [
-            'Metti due coni a ESATTAMENTE ' + dist + ' m (misura col contachilometri del telefono o contando i passi: un passo lungo ≈ 1 metro).',
+            'COME MISURARE — due coni a ' + U.passi(dist) + ' di distanza (' + dist + ' m). Qui la precisione conta: se puoi, verifica col contachilometri del telefono la prima volta e poi usa punti fissi.',
             'Al via: 15" per arrivare al cono opposto. Poi 15" FERMO o camminando. Poi riparti verso l\'altro cono.',
             'Avanti così per 8 minuti: usa il timer dell\'app in modalità cronometro, o un audio 15-15 dal telefono.',
             'Arrivi al cono in anticipo? Bene. Non ci arrivi per 2-3 volte di fila? La distanza è troppa: accorcia di 2 m.',
             'Quando completi il blocco, la prossima volta la distanza sale di 2 m: stai correndo più veloce a parità di fatica.',
           ] },
         { titolo: '15-15 — blocco 2', serie: 1, dettaglio: '8\' sugli stessi ' + dist + ' m del blocco 1, dopo 3\' di recupero', recupero: 0, mAlta: dist * 16,
-          come: ['3\' di recupero camminando, poi identico al blocco 1: stessi coni, stesso ritmo.'] },
+          come: ['Stessi coni del blocco 1 (' + dist + ' m = ' + U.passi(dist) + '): non spostare niente.', '3\' di recupero camminando, poi identico al blocco 1: stesso ritmo.'] },
       ],
     },
   },
@@ -964,12 +968,14 @@ DB.CORSA_SALITA = {
     blocchi: liv => [
       { titolo: 'Progressivi in salita', serie: 2, dettaglio: '25 m al 70-80% per scaldare le caviglie e prendere le misure', recupero: 90,
         come: [
+          'Usa gli stessi coni degli sprint (25 m = ' + U.passi(25) + '): piazzali una volta a inizio seduta.',
           'Non sono sprint: servono a entrare nel gesto e a sentire la pendenza.',
           'Busto inclinato avanti, ginocchia che salgono, passo corto e frequente.',
           'Torna giù camminando con calma (25 m in discesa).',
         ] },
       { titolo: 'Sprint in salita', serie: 6 + liv, dettaglio: '25 m al MASSIMO, partenza da fermo. Si torna giù sempre camminando', recupero: 120, mAlta: 25,
         come: [
+          'COME MISURARE — un cono in fondo alla salita e uno ' + U.passi(25) + ' più su (25 m). Conta i passi camminando in DISCESA: in salita si accorciano e sbagli la misura.',
           '25 metri sono 4-5 secondi: è esattamente l\'accelerazione che ti serve in campo.',
           'Partenza da fermo in leggero affondo, busto ben inclinato avanti.',
           'Primi appoggi corti e potenti, il piede atterra SOTTO di te: spingi indietro, non allungare avanti.',
@@ -987,6 +993,7 @@ DB.CORSA_SALITA = {
       { titolo: 'Balzi in salita', serie: 4, dettaglio: '20 m di balzi ampi alternando le gambe (mezza salita)', recupero: 120,
         come: [
           'Prima di questi devi aver fatto il riscaldamento sulla salita che trovi in cima alla seduta: camminate, mobilità e 2 salite progressive.',
+          'COME MISURARE — segna metà salita con un cono: ' + U.passi(20) + ' dal fondo (20 m).',
           'Non è corsa: sono balzi lunghi, un piede alla volta, come se volassi tra un appoggio e l\'altro.',
           'Braccia che accompagnano forte, atterri sull\'avampiede e riparti subito.',
           'Su 20 m ti verranno circa 10-14 balzi: contali, e cerca di farne SEMPRE MENO per coprire gli stessi metri.',
@@ -995,6 +1002,7 @@ DB.CORSA_SALITA = {
         ] },
       { titolo: 'Ripetute in salita ripida', serie: 6 + liv, dettaglio: '40 m forte (85-90%), recupero corto: scendi camminando e riparti', recupero: 60, mAlta: 40,
         come: [
+          'COME MISURARE — un cono in fondo e uno ' + U.passi(40) + ' più su (40 m). In salita i passi si accorciano: contali camminando in DISCESA, non in salita.',
           '40 m su pendenza forte sono 8-10 secondi di spinta dura: sentirai bruciare, è previsto.',
           'Ritmo tosto ma COSTANTE: l\'ultima ripetuta deve somigliare alla prima.',
           'Il recupero è corto apposta (1 minuto, il tempo di scendere): è così che si allena la gamba che non molla al 90°.',
@@ -1089,9 +1097,9 @@ DB.RISCALDAMENTI = {
     voci: [
       'Corsa blanda 8\' aumentando piano il ritmo',
       'Mobilità dinamica: slanci gamba avanti-dietro e laterali, 10 per gamba',
-      'Skip basso 2×20 m, skip alto 2×20 m, calciata 2×20 m',
+      'Skip basso 2×20 m (' + U.passi(20) + '), skip alto 2×20 m, calciata 2×20 m',
       'Affondi camminati 10 per gamba',
-      'Progressivi: 3×60 m aumentando fino all\'80%',
+      'Progressivi: 3×60 m (' + U.passi(60) + ') aumentando fino all\'80%',
       'Solo dopo tutto questo si sprinta al 100%',
     ],
   },
@@ -1100,8 +1108,8 @@ DB.RISCALDAMENTI = {
     voci: [
       'Corsa facile 8-10\' aumentando piano il ritmo (È il riscaldamento del giorno: la seduta parte già calda)',
       'Mobilità dinamica di anche e caviglie: 10 movimenti per articolazione',
-      'Skip basso e calciata: 2×15 m ciascuno',
-      '2 allunghi da 60 m progressivi',
+      'Skip basso e calciata: 2×15 m ciascuno (' + U.passi(15) + ')',
+      '2 allunghi da 60 m (' + U.passi(60) + ') progressivi',
     ],
   },
   attivazione: {
@@ -1125,7 +1133,7 @@ DB.RISCALDAMENTI = {
       'Ricalcato sul FIFA 11+, il riscaldamento più studiato al mondo: chi lo fa con costanza ha dal 30 al 46% di infortuni in meno. Le tre parti vanno fatte nell\'ordine.',
       'PARTE 1 — Corsa (4\'): trotto leggero avanti e indietro sul campo, poi corsa con anche aperte verso l\'esterno, poi verso l\'interno, poi corsa laterale e contatto spalla a spalla immaginario',
       'PARTE 2 — Forza ed equilibrio (5\'): plank 2×20", plank laterale 20" per lato, 6 nordic curl leggeri (o 20" di appoggio su una gamba a occhi chiusi), 10 squat a corpo libero, 10 saltelli verticali atterrando morbidi con le ginocchia in linea',
-      'PARTE 3 — Corsa veloce (5\'): 3 progressivi da 40 m crescenti (70%, 85%, 95%), poi 4 corse con cambio di direzione secco sui 5 m, poi 2 accelerazioni da 15 m al MASSIMO',
+      'PARTE 3 — Corsa veloce (5\'): 3 progressivi da 40 m (' + U.passi(40) + ') crescenti al 70%, 85%, 95% · poi 4 corse con cambio di direzione secco ogni 5 m (' + U.passi(5) + ') · poi 2 accelerazioni da 15 m (' + U.passi(15) + ') al MASSIMO',
       'Ultimi 5\' prima del fischio: non stare fermo. Cammina, palleggia, qualche skip — il corpo deve restare caldo',
       'Vale anche per il calcetto: è ciò che ti evita di sembrare lento nei primi 15 minuti. La ricerca dice che l\'unica cosa che conta davvero è farlo SEMPRE, non farlo perfetto',
     ],
@@ -1206,6 +1214,22 @@ DB.RUOLO = {
     '**Si frena l\'80-100% in più di quanto si accelera**, con forze fino a 2,7 volte superiori',
     'Traduzione: ti servono motore (resistenza), ripetibilità (RSA), accelerazione, freni e cambi di direzione — tutti insieme. È il ruolo atleticamente più esigente del calcio.',
     'Ecco perché nel tuo programma la resistenza e l\'RSA pesano tanto quanto la velocità pura, e perché sono entrate le frenate.',
+  ],
+};
+
+/* ---------- COME MISURARE ----------
+   Tutte le distanze dell'app sono convertite in passi camminati, così i coni
+   li piazzi senza metro. Un passo normale vale circa 0,80 m. */
+DB.MISURE = {
+  nome: 'Come misurare le distanze senza metro',
+  descr: 'Nell\'app ogni distanza porta anche i passi. Contali camminando normale, non a passi allungati.',
+  voci: [
+    'TARA IL TUO PASSO (una volta sola) — cammina 10 passi normali, misurali col metro e dividi per 10. Se ti viene 0,80 m sei nella media dell\'app; se il tuo passo è più lungo o più corto, aggiusta di conseguenza',
+    'TABELLA — 5 m = ' + U.passi(5) + ' · 10 m = ' + U.passi(10) + ' · 15 m = ' + U.passi(15) + ' · 20 m = ' + U.passi(20) + ' · 25 m = ' + U.passi(25) + ' · 30 m = ' + U.passi(30) + ' · 40 m = ' + U.passi(40) + ' · 60 m = ' + U.passi(60) + ' · 80 m = ' + U.passi(80) + ' · 100 m = ' + U.passi(100),
+    'RIFERIMENTI REALI — un\'auto media è lunga 4,5 m · dal dischetto alla porta ci sono 11 m · l\'area piccola è larga 18,3 m · l\'area grande è profonda 16,5 m · un campo da calcetto è circa 40 × 20 m',
+    'SU STRADA — i lampioni sono spesso a 25-30 m l\'uno dall\'altro: misurane una coppia una volta e li userai come coni naturali per sempre',
+    'PER LE DISTANZE LUNGHE (400 m e oltre) — misura una volta col contachilometri del telefono e segnati due punti fissi: da lì in poi non serve più',
+    'CONSIGLIO — misura i tuoi tratti UNA volta e memorizzali (cancello, palo, panchina): a ogni seduta parti già pronto invece di perdere dieci minuti a contare',
   ],
 };
 
@@ -1361,7 +1385,7 @@ DB.TEST = {
   brevi: {
     nome: 'Test brevi (giorno velocità)', icona: '⏱️',
     dove: 'velocita',
-    descr: 'Riscaldati come per una seduta di velocità completa. Misura sul tratto di strada piano, con i coni a segnare le distanze.',
+    descr: 'Riscaldati come per una seduta di velocità completa. Tratto di strada piano, coni a segnare le distanze: 10 m = ' + U.passi(10) + ', 30 m = ' + U.passi(30) + '. Usa sempre gli stessi punti a ogni ciclo di test, altrimenti i confronti non valgono.',
     campi: [
       { id: 'sprint10', label: 'Sprint 10 m', unita: 's', migliora: 'giu', step: 0.01, hint: '2-3 prove, segna la migliore' },
       { id: 'sprint30', label: 'Sprint 30 m', unita: 's', migliora: 'giu', step: 0.01, hint: '2 prove con recupero completo' },

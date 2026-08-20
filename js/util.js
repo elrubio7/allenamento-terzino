@@ -62,6 +62,10 @@ const U = {
     return Math.floor(sec / 60) + "'" + U.pad2(sec % 60) + '"';
   },
 
+  /* metri → passi camminati (un passo normale ≈ 0,80 m): serve a piazzare i coni
+     senza metro. Es. U.passi(20) → "25 passi" */
+  passi(m) { return Math.round(m / 0.8) + ' passi'; },
+
   esc(s) {
     return String(s == null ? '' : s)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
