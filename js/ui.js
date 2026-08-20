@@ -685,6 +685,12 @@ const UI = {
     html += '<div class="card-prep evidenza"><h3>🧍 ' + U.esc(DB.MOBILITA.nome) + '</h3><p>' + U.esc(DB.MOBILITA.descr) + '</p><ol>' +
       DB.MOBILITA.voci.map(v => '<li>' + U.esc(v) + '</li>').join('') + '</ol></div>';
 
+    /* il profilo del ruolo: i numeri che spiegano perché il programma è così */
+    html += '<details class="card-prep ruolo"><summary><strong>⚽ ' + U.esc(DB.RUOLO.nome) + '</strong></summary>' +
+      '<p>' + U.esc(DB.RUOLO.descr) + '</p><ul>' +
+      DB.RUOLO.voci.map(v => '<li>' + U.esc(v).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') + '</li>').join('') +
+      '</ul></details>';
+
     const st = DB.STRETCHING[UI.prepTipo];
     if (st) html += '<div class="card-prep"><h3>🧘 ' + U.esc(st.nome) + '</h3><ol>' + st.voci.map(v => '<li>' + U.esc(v) + '</li>').join('') + '</ol></div>';
     return html;

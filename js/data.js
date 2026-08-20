@@ -16,7 +16,7 @@
    ============================================================ */
 const DB = {};
 
-DB.BUILD = '2.0.0';
+DB.BUILD = '2.1.0';
 
 /* durata tipica delle sedute in minuti (per il calcolo del carico RPE×minuti) */
 DB.DURATE = { forza: 60, alta: 60, velocita: 50, resistenza: 45, attivazione: 25, recupero: 30 };
@@ -53,7 +53,7 @@ DB.FASI = {
     schemaBig: { serie: 5, reps: 3, label: '5×3' },
     moltiplicatore: 0.8,
     recuperoBig: 150,
-    esecuzioneBig: 'ESPLOSIVO: spingi alla massima velocità possibile, ferma la serie se rallenti.',
+    esecuzioneBig: 'ESPLOSIVO: spingi alla massima velocità possibile, ferma la serie se rallenti. METODO CONTRASTO: entro 15 secondi dalla fine di ogni serie fai 3 balzi verticali massimali — il carico pesante "sveglia" le fibre veloci e il salto ne raccoglie il beneficio. Sei settimane di questo metodo, due volte a settimana, hanno migliorato 5 m, 30 m, squat e salto negli studi sui calciatori.',
   },
 };
 DB.ORDINE_FASI = ['ipertrofia', 'forza', 'potenza'];
@@ -539,6 +539,17 @@ DB.ESERCIZI = {
   },
 
   /* ===== RECUPERO (garage) ===== */
+  salto_controllo: {
+    nome: 'Salto di controllo (spia della fatica)', tipoCarico: 'corpo', recupero: 45,
+    schema: { serie: 3, reps: 1, label: '3 salti, tieni il migliore' },
+    esecuzione: [
+      'Salto in lungo da fermo, piedi pari, con la rincorsa delle braccia: misura dal via al tallone più arretrato.',
+      'Fanne 3 con 45" di pausa e segnati il migliore (annotalo con il tasto 📝 nota).',
+      'Confrontalo con il tuo solito: se è sceso di più del 5%, il sistema nervoso è ancora stanco.',
+      'Se è sceso: prendi la settimana con calma, i carichi non salgono di corsa.',
+      'Se è uguale o meglio: sei recuperato, si può spingere.',
+    ],
+  },
   cyclette_recupero: {
     nome: 'Cyclette rigenerante', tipoCarico: 'corpo', recupero: 0,
     schema: { serie: 1, reps: 1, label: '20 minuti, resistenza 2-3' },
@@ -699,6 +710,10 @@ DB.DETTAGLI = {
     perche: 'Caviglie reattive come molle: il primo contatto col terreno domani sarà già acceso.',
     errori: 'Atterrare di tallone o fare pause tra un balzo e l\'altro.',
   },
+  salto_controllo: {
+    perche: 'Il salto è la spia più onesta della fatica nervosa: nei club si misura per capire se un giocatore è recuperato. Dopo una partita il calo peggiore arriva tra le 48 e le 72 ore — proprio quando le sensazioni ti dicono che stai bene.',
+    errori: 'Farlo di fretta o senza scaldarsi: il numero non varrebbe niente. E non provare a batterti a tutti i costi: qui misuri, non gareggi.',
+  },
   cyclette_recupero: {
     perche: 'Gambe che girano senza impatti: il sangue circola e porta via la fatica della partita.',
     errori: 'Pedalare troppo forte: se non riesci a parlare, stai andando troppo.',
@@ -741,7 +756,7 @@ DB.SEDUTE = {
   },
   recupero: {
     nome: 'Recupero', icona: '🌿', luogo: 'garage',
-    slots: [{ ex: 'cyclette_recupero' }, { ex: 'foam_roller_seq' }],
+    slots: [{ ex: 'salto_controllo' }, { ex: 'cyclette_recupero' }, { ex: 'foam_roller_seq' }],
   },
   partita: { nome: 'Partita', icona: '⚽', luogo: 'campo' },
 };
@@ -751,6 +766,26 @@ DB.CORE_PER_FASE = {
   ipertrofia: { rot: 'core_base' },
   forza: { rot: 'core_forza' },
   potenza: { ex: 'hollow_rock' },
+};
+
+/* Frenate: nel calcio si decelera l'80-100% in più di quanto si accelera, con forze
+   fino a 2,7 volte superiori — è il gesto meccanicamente più duro che esista, e va
+   allenato con la stessa priorità dello sprint. Blocco condiviso da tutte le sedute
+   di velocità in piano.                                                            */
+DB.BLOCCO_FRENATE = function (serie) {
+  return {
+    titolo: 'Frenate e cambi di direzione', serie: serie,
+    dettaglio: '20 m di accelerazione e stop completo dentro una zona di 5 m segnata dai coni',
+    recupero: 90,
+    come: [
+      'Metti due coni a 20 m e un terzo cono 5 m più avanti: devi fermarti COMPLETAMENTE dentro quei 5 metri.',
+      'È il gesto più impegnativo del calcio: si frena l\'80-100% in più di quanto si accelera, con forze fino a 2,7 volte più alte. Gli studi la chiamano il secondo "vaccino" contro gli infortuni, dopo lo sprint.',
+      'Tecnica: negli ultimi appoggi accorcia e allarga i piedi, abbassa il baricentro, petto ALTO — non piegarti in avanti sulle punte.',
+      'Alterna: metà frenate secche dritte, metà con cambio di direzione a 90° e ripartenza esplosiva.',
+      'Prima impara a fermarti pulito, poi fallo più veloce. Le prime volte le gambe saranno indolenzite il giorno dopo: è normale, è il gesto che crea più danno muscolare.',
+      'Per un terzino è oro: ogni ripiegamento difensivo finisce con una frenata.',
+    ],
+  };
 };
 
 /* ---------- CORSA ----------
@@ -773,13 +808,12 @@ DB.CORSA = {
             'Schema 4 — DENTRO-FUORI: piedi dentro il riquadro poi fuori larghi, avanzando.',
             'Guarda avanti, non i piedi. Prima la precisione, poi la velocità.',
           ] },
-        { titolo: 'Slalom tra i coni', serie: 4, dettaglio: '6 coni a zig-zag su 20 m: slalom a buona velocità con appoggi corti, ritorno camminando. I cambi di direzione sono il pane del terzino', recupero: 60,
+        { titolo: 'Balzi pliometrici', serie: 3, dettaglio: '10 salti reattivi a serie: contatto a terra brevissimo, come una molla', recupero: 90,
           come: [
-            'Sistema 6 coni in linea, uno ogni 3-4 metri (20 m totali), sfalsati di un metro a destra e a sinistra a zig-zag.',
-            'Parti al 70-80%: curva stretta attorno a ogni cono, NON larga.',
-            'Al cambio di direzione: passi corti e rapidi, baricentro basso, spingi col piede esterno.',
-            'Il busto anticipa la direzione nuova, le braccia aiutano la sterzata.',
-            'Torna camminando al via: la qualità di ogni slalom vale più della velocità media.',
+            'Saltelli verticali sul posto a piedi pari: atterri sull\'avampiede e riparti SUBITO, senza affondare.',
+            'Il segreto non è saltare alto: è stare a terra pochissimo. Immagina il terreno che scotta.',
+            'Falli da fresco, prima degli sprint: servono anche a "caricare" il sistema nervoso per il lavoro dopo.',
+            'Due sedute a settimana di pliometria (queste più i balzi in salita) sono la dose che negli studi migliora salto, cambi di direzione e sprint: tre diventano troppe e portano solo indolenzimento.',
           ] },
         { titolo: 'Accelerazioni progressive', serie: 5 + liv, dettaglio: '60 m l\'una: parti piano e arriva al 90% negli ultimi 20 m', recupero: 120,
           come: [
@@ -796,6 +830,7 @@ DB.CORSA = {
             'Recupero COMPLETO (3\'): senza freschezza non raggiungi la velocità che serve, e il lavoro non conta.',
             'Bastano 2 sprint fatti bene: qui il volume non serve, serve la qualità.',
           ] },
+        DB.BLOCCO_FRENATE(4),
       ],
     },
     forza: {
@@ -823,6 +858,7 @@ DB.CORSA = {
             'Recupero completo di 3\': senza freschezza non tocchi la velocità che serve.',
             'Sull\'ultimo puoi variare la partenza (da seduto, prono, dopo un giro su te stesso) per simulare le partenze sporche della partita.',
           ] },
+        DB.BLOCCO_FRENATE(5),
       ],
     },
     potenza: {
@@ -848,6 +884,7 @@ DB.CORSA = {
             'Prima di iniziare: 4\' di recupero vero (cammina, bevi un sorso).',
             'Poi identico al blocco 1: stessi 40 m, stessi 20" tra gli sprint.',
           ] },
+        DB.BLOCCO_FRENATE(4),
         { titolo: 'Navette con i coni', serie: 4, dettaglio: '10+20+10 m con cambi di senso sui coni', recupero: 90,
           come: [
             'Tre coni in linea: A (via), B a 10 m, C a 30 m da A.',
@@ -1085,13 +1122,12 @@ DB.RISCALDAMENTI = {
   partita: {
     nome: 'Riscaldamento pre-partita (15 minuti, a bordo campo)',
     voci: [
-      'Corsa progressiva 5\': primi 2\' pianissimo, poi sali fino a un trotto medio',
-      'Mobilità dinamica 3\': slanci gamba avanti-dietro e laterali 10 per gamba, affondi camminati 8 per gamba, aperture d\'anca 8 per lato',
-      'Attivazione 2\': skip basso, skip alto, calciata e corsa laterale — 20 m ciascuno',
-      'Progressivi: 3 × 40 m crescenti (70%, 85%, 95%)',
-      'Accelerazioni: 2 × 15 m al MASSIMO da fermo — questo è il pezzo che ti fa partire pronto',
-      'Ultimi 5\' prima del fischio: non stare fermo. Cammina, palleggia, qualche skip: il corpo deve restare caldo',
-      'È il protocollo che usano i professionisti prima di entrare — vale anche per il calcetto, ed è ciò che ti evita di sembrare lento nei primi 15 minuti',
+      'Ricalcato sul FIFA 11+, il riscaldamento più studiato al mondo: chi lo fa con costanza ha dal 30 al 46% di infortuni in meno. Le tre parti vanno fatte nell\'ordine.',
+      'PARTE 1 — Corsa (4\'): trotto leggero avanti e indietro sul campo, poi corsa con anche aperte verso l\'esterno, poi verso l\'interno, poi corsa laterale e contatto spalla a spalla immaginario',
+      'PARTE 2 — Forza ed equilibrio (5\'): plank 2×20", plank laterale 20" per lato, 6 nordic curl leggeri (o 20" di appoggio su una gamba a occhi chiusi), 10 squat a corpo libero, 10 saltelli verticali atterrando morbidi con le ginocchia in linea',
+      'PARTE 3 — Corsa veloce (5\'): 3 progressivi da 40 m crescenti (70%, 85%, 95%), poi 4 corse con cambio di direzione secco sui 5 m, poi 2 accelerazioni da 15 m al MASSIMO',
+      'Ultimi 5\' prima del fischio: non stare fermo. Cammina, palleggia, qualche skip — il corpo deve restare caldo',
+      'Vale anche per il calcetto: è ciò che ti evita di sembrare lento nei primi 15 minuti. La ricerca dice che l\'unica cosa che conta davvero è farlo SEMPRE, non farlo perfetto',
     ],
   },
   salita_ripida: {
@@ -1131,6 +1167,22 @@ DB.CALDO = {
     'Maglia chiara e leggera, cappellino, e bagnati testa e nuca nei recuperi',
     'Servono 10-14 giorni di esposizione per acclimatarti: le prime sedute saranno le peggiori, poi migliora',
     'Se hai crampi, testa che pulsa o pelle d\'oca col caldo: chiudi la seduta. Non è debolezza, è il corpo che avvisa',
+  ],
+};
+
+/* ---------- IL RUOLO ----------
+   Cosa chiede la partita a un terzino d'élite: sono i numeri che giustificano
+   la struttura di tutto il programma. */
+DB.RUOLO = {
+  nome: 'Cosa chiede la partita a un terzino',
+  descr: 'Numeri rilevati col GPS nel calcio professionistico. Non sono obiettivi da raggiungere: servono a farti capire perché il tuo programma è fatto così.',
+  voci: [
+    '**11-13 km a partita**: il terzino è il giocatore di movimento che corre di più in assoluto',
+    '**800-1200 m di corsa ad alta intensità** (sopra i 19,8 km/h): più di qualunque altro ruolo in campo',
+    '**20-35 sprint a partita**: un difensore centrale ne fa 8-14, tu il doppio o il triplo',
+    '**Si frena l\'80-100% in più di quanto si accelera**, con forze fino a 2,7 volte superiori',
+    'Traduzione: ti servono motore (resistenza), ripetibilità (RSA), accelerazione, freni e cambi di direzione — tutti insieme. È il ruolo atleticamente più esigente del calcio.',
+    'Ecco perché nel tuo programma la resistenza e l\'RSA pesano tanto quanto la velocità pura, e perché sono entrate le frenate.',
   ],
 };
 
