@@ -101,6 +101,13 @@ h2, h3 { text-transform: uppercase; letter-spacing: .03em; }
 .chip-md { border-color: var(--viola); color: var(--viola); font-weight: 800; letter-spacing: .06em; }
 .box-caldo { border-left: 4px solid var(--rosso); }
 .box-riscaldamento { border-left: 4px solid var(--giallo); }
+.box-recupero { border-left: 4px solid var(--teal); }
+.carico-metri { margin: 4px 0 12px; }
+.carico-metri-testa { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+.carico-metri-testa strong { font-size: 1.3rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+.carico-metri.stato-dentro .barra-fill { background: linear-gradient(90deg, var(--azzurro), var(--accento)); }
+.carico-metri.stato-sotto .barra-fill { background: var(--muto); }
+.carico-metri.stato-sopra .barra-fill { background: linear-gradient(90deg, var(--giallo), var(--rosso)); }
 .chip-luogo { color: var(--muto); }
 .chip-consolida { border-color: var(--giallo); color: var(--giallo); }
 .chip-fastidio { border-color: var(--rosso); color: var(--rosso); }

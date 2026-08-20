@@ -596,7 +596,9 @@ const UI = {
     }
 
     if (g.stato === 'fatta') {
-      html += '<div class="seduta-congelata"><h3>✓ Partita giocata' + (g.minuti ? ' — ' + g.minuti + '\'' : '') + '</h3><p>Domani: recupero' + (g.minuti >= 75 ? ' con i fiocchi' : '') + '.</p></div>';
+      html += '<div class="seduta-congelata"><h3>✓ Partita giocata' + (g.minuti ? ' — ' + g.minuti + '\'' : '') + '</h3><p>Domani: recupero' + (g.minuti >= 75 ? ' con i fiocchi' : '') + '.</p></div>' +
+        '<details class="dettagli-box box-recupero" open><summary>🧊 ' + U.esc(DB.RECUPERO_POST.nome) + '</summary><ul>' +
+        DB.RECUPERO_POST.voci.map(v => '<li>' + U.esc(v) + '</li>').join('') + '</ul></details>';
     } else {
       const optMin = [90, 105, 120, 75, 60, 45, 30, 15, 0].map(m => '<option value="' + m + '">' + m + ' minuti</option>').join('');
       let optRpe = '';
@@ -831,6 +833,29 @@ const UI = {
       '<div class="stat"><strong>' + st.streak + '</strong><span>settimane di fila (3+ sedute)</span></div>' +
       '</div>' +
       (cronico > 0 ? '<p class="nota-sixpack">Carico ultimi 7 giorni: <strong>' + acuto + '</strong> · media settimanale del mese: <strong>' + cronico + '</strong> (RPE × minuti — vota la fatica a fine seduta per tenerlo aggiornato)</p>' : '<p class="nota-sixpack">Vota la fatica (1-10) a fine seduta: l\'app calcola il carico settimanale e ti avvisa se stai accelerando troppo.</p>');
+
+    /* carico esterno: i metri veri, come lo misurano i club col GPS */
+    const m7 = E.metriFinestra(oggi, 7);
+    const barra = (valore, min, max) => {
+      const perc = Math.max(0, Math.min(100, Math.round(valore / max * 100)));
+      const stato = valore < min ? 'sotto' : (valore > max ? 'sopra' : 'dentro');
+      return '<div class="carico-metri stato-' + stato + '">' +
+        '<div class="carico-metri-testa"><strong>' + valore + ' m</strong><small>obiettivo ' + min + '-' + max + ' m</small></div>' +
+        '<div class="barra"><div class="barra-fill" style="width:' + perc + '%"></div></div></div>';
+    };
+    html += '<div class="card-prep"><h3>📍 Carico esterno (ultimi 7 giorni)</h3>' +
+      '<p>I metri che i club misurano col GPS, partita compresa. Gli obiettivi sono tarati sulle richieste di un terzino: in fase Ipertrofia è normale stare sotto (lì si costruisce), in Forza e Potenza si sale.</p>' +
+      '<h4 class="titolo-grafico">Metri ad alta intensità</h4>' + barra(m7.alta, DB.CARICO_TARGET.alta[0], DB.CARICO_TARGET.alta[1]) +
+      '<h4 class="titolo-grafico">Metri di sprint</h4>' + barra(m7.sprint, DB.CARICO_TARGET.sprint[0], DB.CARICO_TARGET.sprint[1]) +
+      '<p class="nota-sixpack">' +
+      (m7.alta === 0 && m7.sprint === 0
+        ? 'Completa le sedute di strada e la partita: i metri si contano da soli.'
+        : (m7.alta < DB.CARICO_TARGET.alta[0]
+            ? 'Sei sotto il volume di riferimento: se ti senti bene, non saltare le sedute di strada.'
+            : (m7.alta > DB.CARICO_TARGET.alta[1]
+                ? 'Sei sopra il riferimento: settimana intensa, occhio alle sensazioni.'
+                : 'Sei nella finestra giusta: è il volume che regge la partita senza logorarti.'))) +
+      '</p></div>';
 
     /* grafico del carico settimanale (ultime 8 settimane) */
     const puntiCarico = [];

@@ -170,6 +170,16 @@ E.pagella = function (set) {
   return { inizio: set.inizio, tipo: set.tipo, fatte, saltate, tot, partiteGiocate, carico };
 };
 
+/* carico esterno degli ultimi N giorni: metri ad alta intensità e di sprint */
+E.metriFinestra = function (finoIso, giorni) {
+  let alta = 0, sprint = 0;
+  for (const s of S.data.storico) {
+    const d = U.diffDays(s.data, finoIso);
+    if (d >= 0 && d < giorni) { alta += s.mAlta || 0; sprint += s.mSprint || 0; }
+  }
+  return { alta, sprint };
+};
+
 /* ---------- statistiche di costanza ---------- */
 E.statistiche = function () {
   const oggi = U.todayISO();
@@ -662,6 +672,17 @@ E.completaSeduta = function (iso) {
     return { fatte: n, complete: n >= tot };
   };
 
+  /* metri ad alta intensità e di sprint davvero percorsi: è il carico esterno,
+     quello che i club misurano col GPS */
+  let mAlta = 0, mSprint = 0;
+  if (vm.blocchi) {
+    vm.blocchi.forEach((b, i) => {
+      const fatte = serieComplete(i, b.serie || 1).fatte;
+      mAlta += (b.mAlta || 0) * fatte;
+      mSprint += (b.mSprint || 0) * fatte;
+    });
+  }
+
   if (vm.soloTest) {
     /* --- giornata test: il test sostituisce il lavoro, nessuna progressione di corsa --- */
     const tId = g.testFatto || g.test;
@@ -762,6 +783,7 @@ E.completaSeduta = function (iso) {
   S.data.storico.unshift({
     data: iso, completata: oggi, tipo: vm.tipo,
     nome: vm.nome, fase: vm.faseNome, dettagli,   /* il nome porta già 🌧 o 🏔 */
+    mAlta, mSprint,
   });
 
   /* avanzamento di fase: ogni 3 sedute di forza gambe piene
@@ -786,10 +808,14 @@ E.segnaPartitaGiocata = function (iso, minuti, rpe) {
   g.stato = 'fatta';
   g.minuti = minuti != null ? minuti : null;   /* 0 (panchina) è un valore valido */
   S.data.ultimaPartita = iso;
+  /* i metri della partita: quelli di un terzino, in proporzione ai minuti giocati */
+  const quota = (minuti != null ? minuti : 90) / 90;
   S.data.storico.unshift({
     data: iso, completata: U.todayISO(), tipo: 'partita',
     nome: 'Partita ⚽' + (minuti != null ? ' — ' + minuti + '\'' : ''),
     fase: '', dettagli: [], minuti: minuti != null ? minuti : null, rpe: rpe || null,
+    mAlta: Math.round(DB.PARTITA_METRI.alta * quota),
+    mSprint: Math.round(DB.PARTITA_METRI.sprint * quota),
   });
   S.save();
 };

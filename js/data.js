@@ -16,7 +16,7 @@
    ============================================================ */
 const DB = {};
 
-DB.BUILD = '2.1.0';
+DB.BUILD = '2.2.0';
 
 /* durata tipica delle sedute in minuti (per il calcolo del carico RPE×minuti) */
 DB.DURATE = { forza: 60, alta: 60, velocita: 50, resistenza: 45, attivazione: 25, recupero: 30 };
@@ -768,6 +768,28 @@ DB.CORE_PER_FASE = {
   potenza: { ex: 'hollow_rock' },
 };
 
+/* Sprint LANCIATI: è così che nei club si allena la velocità massima. Da fermo passi
+   quasi tutti i 40 m ad accelerare e il picco lo tocchi per un istante; con un lancio
+   progressivo arrivi al massimo e ci resti per 20 metri buoni. 1-2 volte a settimana,
+   da fresco, con recupero pieno: è il lavoro più esigente per il sistema nervoso.
+   mSprint = metri percorsi a velocità di sprint (per il conteggio del carico).      */
+DB.BLOCCO_SPRINT_MAX = function (serie) {
+  return {
+    titolo: 'Sprint lanciati (velocità massima)', serie: serie,
+    dettaglio: '25 m di lancio progressivo + 20 m A TUTTA + 20 m per rallentare. Recupero completo',
+    recupero: 180,
+    mSprint: 20,
+    come: [
+      'Segna tre zone con i coni: 25 m di lancio, 20 m di sprint vero, 20 m per frenare in scioltezza.',
+      'Nel lancio sali gradualmente e RILASSATO: non è una partenza, è un avvicinamento. Devi entrare nella zona già veloce.',
+      'Nei 20 m centrali vai al massimo assoluto: busto alto, spalle sciolte, ginocchia che salgono. Cerca la frequenza dei passi, non il passo lungo.',
+      'Da fermo la velocità massima la sfiori appena; lanciato ci resti dentro per 20 metri — per questo i club allenano così la velocità pura.',
+      'Recupero COMPLETO di 3\': è il lavoro più esigente per il sistema nervoso di tutta la settimana.',
+      'È anche la dose settimanale sopra il 95% che protegge i femorali: non si salta mai.',
+    ],
+  };
+};
+
 /* Frenate: nel calcio si decelera l'80-100% in più di quanto si accelera, con forze
    fino a 2,7 volte superiori — è il gesto meccanicamente più duro che esista, e va
    allenato con la stessa priorità dello sprint. Blocco condiviso da tutte le sedute
@@ -777,6 +799,7 @@ DB.BLOCCO_FRENATE = function (serie) {
     titolo: 'Frenate e cambi di direzione', serie: serie,
     dettaglio: '20 m di accelerazione e stop completo dentro una zona di 5 m segnata dai coni',
     recupero: 90,
+    mAlta: 20,
     come: [
       'Metti due coni a 20 m e un terzo cono 5 m più avanti: devi fermarti COMPLETAMENTE dentro quei 5 metri.',
       'È il gesto più impegnativo del calcio: si frena l\'80-100% in più di quanto si accelera, con forze fino a 2,7 volte più alte. Gli studi la chiamano il secondo "vaccino" contro gli infortuni, dopo lo sprint.',
@@ -815,7 +838,7 @@ DB.CORSA = {
             'Falli da fresco, prima degli sprint: servono anche a "caricare" il sistema nervoso per il lavoro dopo.',
             'Due sedute a settimana di pliometria (queste più i balzi in salita) sono la dose che negli studi migliora salto, cambi di direzione e sprint: tre diventano troppe e portano solo indolenzimento.',
           ] },
-        { titolo: 'Accelerazioni progressive', serie: 5 + liv, dettaglio: '60 m l\'una: parti piano e arriva al 90% negli ultimi 20 m', recupero: 120,
+        { titolo: 'Accelerazioni progressive', serie: 5 + liv, dettaglio: '60 m l\'una: parti piano e arriva al 90% negli ultimi 20 m', recupero: 120, mAlta: 25,
           come: [
             'Misura 60 m: due coni distanti 75 passi normali (o usa i lampioni come riferimento).',
             'Primi 20 m: corsa facile, ampia e rilassata.',
@@ -823,13 +846,7 @@ DB.CORSA = {
             'Ultimi 20 m: al 90%, spalle basse e viso rilassato (se digrigni i denti sei troppo teso).',
             'Non è uno sprint secco: è imparare ad accelerare con tecnica pulita.',
           ] },
-        { titolo: 'Sprint massimali in piano', serie: 2, dettaglio: '40 m al 100% in piano, recupero completo. È la dose settimanale che protegge i femorali', recupero: 180,
-          come: [
-            'Questi non si saltano mai: la ricerca dice che chi sprinta almeno una volta a settimana oltre il 95% della velocità massima si stira molto meno.',
-            'Parti da fermo e vai crescendo: la velocità massima vera arriva dopo i 20-25 m, per questo servono 40 m.',
-            'Recupero COMPLETO (3\'): senza freschezza non raggiungi la velocità che serve, e il lavoro non conta.',
-            'Bastano 2 sprint fatti bene: qui il volume non serve, serve la qualità.',
-          ] },
+        DB.BLOCCO_SPRINT_MAX(3),
         DB.BLOCCO_FRENATE(4),
       ],
     },
@@ -843,7 +860,7 @@ DB.CORSA = {
             'Contatti a terra brevissimi, come su carboni ardenti.',
             'Se sbagli un riquadro non fermarti: la fluidità conta più della precisione oggi.',
           ] },
-        { titolo: 'Sprint con paracadute', serie: 5 + liv, dettaglio: '30 m al 100% con paracadute. La qualità vale più della quantità: recupero completo', recupero: 180,
+        { titolo: 'Sprint con paracadute', serie: 5 + liv, dettaglio: '30 m al 100% con paracadute. La qualità vale più della quantità: recupero completo', recupero: 180, mAlta: 30,
           come: [
             'Allaccia la cintura del paracadute in vita, paracadute dietro di te a terra.',
             'Misura 30 m con due coni (circa 38 passi normali).',
@@ -851,13 +868,7 @@ DB.CORSA = {
             'Il paracadute si apre da solo e ti frena: tu continua a spingere al massimo fino al cono.',
             'Recupero COMPLETO (3\'): lo sprint massimale funziona solo se sei fresco. Se rallenti vistosamente, fermati.',
           ] },
-        { titolo: 'Sprint massimali in piano', serie: 3, dettaglio: '40 m al 100% SENZA paracadute, recupero completo. La dose settimanale di velocità vera', recupero: 180,
-          come: [
-            'Togli il paracadute: ora sei "leggero" ed è il momento in cui vai più forte di tutta la settimana (effetto contrasto).',
-            'Non si saltano mai: sprintare oltre il 95% almeno una volta a settimana è ciò che protegge i femorali. Gli sprint resistiti da soli non bastano, perché la velocità massima non la raggiungi mai.',
-            'Recupero completo di 3\': senza freschezza non tocchi la velocità che serve.',
-            'Sull\'ultimo puoi variare la partenza (da seduto, prono, dopo un giro su te stesso) per simulare le partenze sporche della partita.',
-          ] },
+        DB.BLOCCO_SPRINT_MAX(3),
         DB.BLOCCO_FRENATE(5),
       ],
     },
@@ -865,13 +876,8 @@ DB.CORSA = {
       id: 'vel_potenza', nome: 'Velocità — RSA (sprint ripetuti da gara)',
       prog: { tipo: 'serie', base: 6, step: 1, max: 10, cosa: 'sprint per blocco' },
       blocchi: liv => [
-        { titolo: 'Sprint massimali in piano', serie: 2, dettaglio: '40 m al 100% da fresco, PRIMA dell\'RSA. Recupero completo', recupero: 180,
-          come: [
-            'Si fanno all\'inizio, quando sei fresco: nell\'RSA la velocità cala per la fatica, quindi lì non tocchi mai il massimo.',
-            'È la dose settimanale sopra il 95% che protegge i femorali: 2 sprint bastano.',
-            'Recupero completo di 3\' tra i due.',
-          ] },
-        { titolo: 'RSA — blocco 1', serie: 6 + liv, dettaglio: '40 m al massimo, poi torna camminando veloce: hai 25" tra gli sprint', recupero: 25,
+        DB.BLOCCO_SPRINT_MAX(3),
+        { titolo: 'RSA — blocco 1', serie: 6 + liv, dettaglio: '40 m al massimo, poi torna camminando veloce: hai 25" tra gli sprint', recupero: 25, mSprint: 40,
           come: [
             'Due coni a 40 m (circa 50 passi normali).',
             'Sprint al massimo fino al cono, poi girati e torna camminando VELOCE verso il via.',
@@ -879,13 +885,13 @@ DB.CORSA = {
             'È l\'allenamento più simile alla partita: sprint ripetuti con recupero incompleto.',
             'Obiettivo: che l\'ultimo sprint sia veloce quasi quanto il primo.',
           ] },
-        { titolo: 'RSA — blocco 2', serie: 6 + liv, dettaglio: '40 m come il blocco 1, dopo 4\' di recupero completo', recupero: 25,
+        { titolo: 'RSA — blocco 2', serie: 6 + liv, dettaglio: '40 m come il blocco 1, dopo 4\' di recupero completo', recupero: 25, mSprint: 40,
           come: [
             'Prima di iniziare: 4\' di recupero vero (cammina, bevi un sorso).',
             'Poi identico al blocco 1: stessi 40 m, stessi 20" tra gli sprint.',
           ] },
         DB.BLOCCO_FRENATE(4),
-        { titolo: 'Navette con i coni', serie: 4, dettaglio: '10+20+10 m con cambi di senso sui coni', recupero: 90,
+        { titolo: 'Navette con i coni', serie: 4, dettaglio: '10+20+10 m con cambi di senso sui coni', recupero: 90, mAlta: 40,
           come: [
             'Tre coni in linea: A (via), B a 10 m, C a 30 m da A.',
             'Sprint A→B, tocca terra vicino al cono, inverti e vai B→C (20 m), inverti, chiudi C→B (10 m).',
@@ -916,7 +922,7 @@ DB.CORSA = {
       id: 'res_forza', nome: 'Resistenza — fartlek (cambi di ritmo)',
       prog: { tipo: 'serie', base: 8, step: 1, max: 14, cosa: 'cambi di ritmo' },
       blocchi: liv => [
-        { titolo: 'Fartlek', serie: 8 + liv, dettaglio: '30" forte al 85-90% (circa 130-150 m), poi 90" piano: spunta a ogni tratto forte', recupero: 90,
+        { titolo: 'Fartlek', serie: 8 + liv, dettaglio: '30" forte al 85-90% (circa 130-150 m), poi 90" piano: spunta a ogni tratto forte', recupero: 90, mAlta: 140,
           come: [
             'Scegli un percorso dove puoi correre libero, senza incroci.',
             'Tratto FORTE: 30" all\'85-90% — un ritmo che potresti tenere per 2-3 minuti al massimo. Usa i lampioni o gli alberi come traguardi.',
@@ -932,7 +938,7 @@ DB.CORSA = {
       id: 'res_potenza', nome: 'Resistenza — intermittente 15-15',
       prog: { tipo: 'ritmo', base: 58, step: 2, max: 80, unita: 'm ogni 15"', crescente: true },
       blocchi: (liv, dist) => [
-        { titolo: '15-15 — blocco 1', serie: 1, dettaglio: '8\' di: 15" di corsa coprendo ' + dist + ' m / 15" fermo o camminando. Usa i coni per misurare la distanza', recupero: 180,
+        { titolo: '15-15 — blocco 1', serie: 1, dettaglio: '8\' di: 15" di corsa coprendo ' + dist + ' m / 15" fermo o camminando. Usa i coni per misurare la distanza', recupero: 180, mAlta: dist * 16,
           come: [
             'Metti due coni a ESATTAMENTE ' + dist + ' m (misura col contachilometri del telefono o contando i passi: un passo lungo ≈ 1 metro).',
             'Al via: 15" per arrivare al cono opposto. Poi 15" FERMO o camminando. Poi riparti verso l\'altro cono.',
@@ -940,7 +946,7 @@ DB.CORSA = {
             'Arrivi al cono in anticipo? Bene. Non ci arrivi per 2-3 volte di fila? La distanza è troppa: accorcia di 2 m.',
             'Quando completi il blocco, la prossima volta la distanza sale di 2 m: stai correndo più veloce a parità di fatica.',
           ] },
-        { titolo: '15-15 — blocco 2', serie: 1, dettaglio: '8\' sugli stessi ' + dist + ' m del blocco 1, dopo 3\' di recupero', recupero: 0,
+        { titolo: '15-15 — blocco 2', serie: 1, dettaglio: '8\' sugli stessi ' + dist + ' m del blocco 1, dopo 3\' di recupero', recupero: 0, mAlta: dist * 16,
           come: ['3\' di recupero camminando, poi identico al blocco 1: stessi coni, stesso ritmo.'] },
       ],
     },
@@ -962,7 +968,7 @@ DB.CORSA_SALITA = {
           'Busto inclinato avanti, ginocchia che salgono, passo corto e frequente.',
           'Torna giù camminando con calma (25 m in discesa).',
         ] },
-      { titolo: 'Sprint in salita', serie: 6 + liv, dettaglio: '25 m al MASSIMO, partenza da fermo. Si torna giù sempre camminando', recupero: 120,
+      { titolo: 'Sprint in salita', serie: 6 + liv, dettaglio: '25 m al MASSIMO, partenza da fermo. Si torna giù sempre camminando', recupero: 120, mAlta: 25,
         come: [
           '25 metri sono 4-5 secondi: è esattamente l\'accelerazione che ti serve in campo.',
           'Partenza da fermo in leggero affondo, busto ben inclinato avanti.',
@@ -971,13 +977,7 @@ DB.CORSA_SALITA = {
           'Torna giù SEMPRE camminando: correre in discesa è l\'unico vero rischio di questo lavoro.',
           'Se rallenti vistosamente rispetto ai primi, chiudi lì: conta la qualità, non il numero.',
         ] },
-      { titolo: 'Sprint massimali in piano', serie: 3, dettaglio: '40 m al 100% sul piatto, recupero completo. Non si saltano: la salita da sola non basta', recupero: 180,
-        come: [
-          'In salita non raggiungi mai la velocità massima — è il motivo per cui è sicura, ma è anche il suo limite.',
-          'La ricerca è chiara: serve almeno un\'esposizione a settimana sopra il 95% della velocità massima, altrimenti il femorale non è pronto quando parti a tutta in partita.',
-          'Quindi si chiude sempre sul piatto: 40 m al massimo, con 3\' di recupero completo tra uno e l\'altro.',
-          'Dopo la salita ti sentirai leggerissimo: è l\'effetto contrasto, ed è il momento migliore della settimana per andare forte.',
-        ] },
+      DB.BLOCCO_SPRINT_MAX(3),
     ],
   },
   resistenza: {
@@ -993,7 +993,7 @@ DB.CORSA_SALITA = {
           'È il costruttore di potenza numero uno: la salita ripida ti obbliga a spingere.',
           'Torna giù camminando con calma: qui il recupero conta.',
         ] },
-      { titolo: 'Ripetute in salita ripida', serie: 6 + liv, dettaglio: '40 m forte (85-90%), recupero corto: scendi camminando e riparti', recupero: 60,
+      { titolo: 'Ripetute in salita ripida', serie: 6 + liv, dettaglio: '40 m forte (85-90%), recupero corto: scendi camminando e riparti', recupero: 60, mAlta: 40,
         come: [
           '40 m su pendenza forte sono 8-10 secondi di spinta dura: sentirai bruciare, è previsto.',
           'Ritmo tosto ma COSTANTE: l\'ultima ripetuta deve somigliare alla prima.',
@@ -1167,6 +1167,29 @@ DB.CALDO = {
     'Maglia chiara e leggera, cappellino, e bagnati testa e nuca nei recuperi',
     'Servono 10-14 giorni di esposizione per acclimatarti: le prime sedute saranno le peggiori, poi migliora',
     'Se hai crampi, testa che pulsa o pelle d\'oca col caldo: chiudi la seduta. Non è debolezza, è il corpo che avvisa',
+  ],
+};
+
+/* ---------- CARICO ESTERNO ----------
+   È quello che i club misurano col GPS. Gli studi indicano che il lavoro settimanale
+   dovrebbe stare intorno a 1,5-2,5 volte i metri ad alta intensità di una partita.
+   Per un terzino la gara vale 800-1200 m ad alta intensità e 200-300 m di sprint. */
+DB.CARICO_TARGET = { alta: [1500, 2500], sprint: [300, 450] };
+/* metri stimati in una partita intera da terzino (proporzionati ai minuti giocati) */
+DB.PARTITA_METRI = { alta: 950, sprint: 250 };
+
+/* ---------- RECUPERO POST-PARTITA ----------
+   Le basi (sonno e cibo) valgono più di qualunque rimedio sofisticato. */
+DB.RECUPERO_POST = {
+  nome: 'Le prime 24 ore dopo la partita',
+  voci: [
+    'ENTRO 30 MINUTI — carboidrati e proteine insieme: circa 1 g di carboidrati per kg di peso e 20-40 g di proteine. È la finestra in cui il muscolo ricarica più in fretta',
+    'NELLE 4 ORE DOPO — continua con circa 1 g di carboidrati per kg ogni ora, spalmati nei pasti',
+    'ACQUA — pesati prima e dopo: per ogni chilo perso, 1,5 litri nelle ore successive',
+    'FREDDO (facoltativo) — 10-15 minuti in acqua a 10-15° entro mezz\'ora dalla fine: negli studi migliora il salto e la sensazione di gambe fresche il giorno dopo. Utile soprattutto se rigiochi a breve',
+    'SONNO — 8-10 ore. Chi dorme meno di 8 ore ha 1,7 volte più infortuni; arrivare a 8 abbassa le probabilità del 61%. È la singola cosa più efficace che puoi fare, e costa zero',
+    'Le scorte di zuccheri nei muscoli tornano piene solo dopo 48-72 ore: per questo il giorno dopo si recupera e non si spinge',
+    'Non serve altro: massaggi, creme e rimedi vari incidono sulla sensazione, non sui numeri. Sonno e cibo fanno il 90% del lavoro',
   ],
 };
 
