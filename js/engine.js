@@ -315,8 +315,10 @@ E.risolviSeduta = function (iso) {
   if (g.tipo === 'partita') { vm.partita = true; vm.minuti = g.minuti || null; return vm; }
 
   if (g.tipo === 'velocita' || g.tipo === 'resistenza') {
-    const lavoro = g.pioggia ? DB.CORSA_PIOGGIA[g.tipo]
+    let lavoro = g.pioggia ? DB.CORSA_PIOGGIA[g.tipo]
       : (g.salita ? DB.CORSA_SALITA[g.tipo] : DB.CORSA[g.tipo][eff.chiave]);
+    /* alcune fasi offrono più lavori: si alternano di settimana in settimana */
+    if (Array.isArray(lavoro)) lavoro = lavoro[U.weekNumber(iso) % lavoro.length];
     const st = E.statoCorsa(lavoro.id);
     const livMax = E.livMaxCorsa(lavoro.prog);
     const liv = Math.min(st.livello, livMax);

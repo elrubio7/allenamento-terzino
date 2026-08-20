@@ -456,6 +456,8 @@ h2, h3 { text-transform: uppercase; letter-spacing: .03em; }
 .card-prep.sixpack { border-left: 4px solid var(--arancio); }
 .card-prep.ruolo { border-left: 4px solid var(--accento); }
 .card-prep.misure { border-left: 4px solid var(--viola); }
+.card-prep.profilo-fv { border-left: 4px solid var(--giallo); }
+.profilo-esito { font-weight: 900; text-transform: uppercase; letter-spacing: .03em; color: var(--giallo); margin: 10px 0 4px; }
 .card-prep.ruolo summary, .card-prep.misure summary { cursor: pointer; font-size: 1.02rem; text-transform: uppercase; letter-spacing: .03em; }
 .card-prep.ruolo ul, .card-prep.misure ul { font-size: .9rem; margin-top: 8px; }
 .card-prep.pericolo { border-left: 4px solid var(--rosso); }

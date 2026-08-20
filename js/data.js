@@ -16,7 +16,7 @@
    ============================================================ */
 const DB = {};
 
-DB.BUILD = '2.3.0';
+DB.BUILD = '2.4.0';
 
 /* durata tipica delle sedute in minuti (per il calcolo del carico RPE×minuti) */
 DB.DURATE = { forza: 60, alta: 60, velocita: 50, resistenza: 45, attivazione: 25, recupero: 30 };
@@ -906,7 +906,9 @@ DB.CORSA = {
     },
   },
   resistenza: {
-    ipertrofia: {
+    /* in fase base si alternano ogni settimana due lavori diversi: le ripetute
+       sui 400 m (soglia) e gli intervalli lunghi 4×4 (potenza aerobica). */
+    ipertrofia: [{
       id: 'res_base', nome: 'Resistenza — ripetute tempo',
       prog: { tipo: 'ritmo', base: 115, step: -2, min: 85, unita: 'per 400 m' },
       blocchi: (liv, ritmo) => [
@@ -921,7 +923,23 @@ DB.CORSA = {
         { titolo: 'Defaticamento', serie: 1, dettaglio: '5\' di corsa blanda (circa 800-900 m) + camminata', recupero: 0,
           come: ['Vai a TEMPO, non a distanza: i metri indicati sono solo un\'idea di massima, non misurare niente.', 'Corsa lentissima, quasi camminata: il cuore scende gradualmente e le gambe si sciolgono.'] },
       ],
-    },
+    }, {
+      id: 'res_lungo', nome: 'Resistenza — intervalli lunghi 4×4',
+      prog: { tipo: 'serie', base: 4, step: 1, max: 6, cosa: 'intervalli da 4 minuti' },
+      blocchi: liv => [
+        { titolo: 'Intervalli da 4 minuti', serie: 4 + liv, dettaglio: '4\' a ritmo duro, poi 3\' di trotto lento. È il protocollo aerobico più studiato del calcio', recupero: 180,
+          come: [
+            'Qui non si misurano metri: si va a TEMPO e a sensazione. Ti servono solo un orologio e una strada libera.',
+            'RITMO GIUSTO — 4 minuti a un\'andatura che potresti tenere sì e no per 8-10 minuti: respiro corto e pesante, riesci a dire due o tre parole ma non una frase. Se riesci a parlare stai andando piano; se molli prima dei 4 minuti stai andando troppo forte.',
+            'Tra un intervallo e l\'altro: 3 minuti di trotto LENTO, non camminata. Il recupero attivo tiene alto il motore.',
+            'Il primo intervallo sembrerà facile: è normale, non accelerare. Devi arrivare all\'ultimo con lo stesso ritmo.',
+            'Perché è qui: otto settimane di questo protocollo, due volte a settimana, hanno alzato la potenza aerobica del 7% nei calciatori — e in partita si è tradotto in più chilometri, più intensità e PIÙ SPRINT. È l\'esercizio con le prove migliori di tutto il programma.',
+            'Si alterna ogni settimana con le ripetute sui 400 m: due stimoli diversi, l\'uno costruisce il motore, l\'altro il ritmo.',
+          ] },
+        { titolo: 'Defaticamento', serie: 1, dettaglio: '5\' di corsa blanda + camminata', recupero: 0,
+          come: ['Vai a TEMPO, non a distanza.', 'Corsa lentissima per far scendere il cuore gradualmente.'] },
+      ],
+    }],
     forza: {
       id: 'res_forza', nome: 'Resistenza — fartlek (cambi di ritmo)',
       prog: { tipo: 'serie', base: 8, step: 1, max: 14, cosa: 'cambi di ritmo' },
@@ -1214,6 +1232,8 @@ DB.RUOLO = {
     '**Si frena l\'80-100% in più di quanto si accelera**, con forze fino a 2,7 volte superiori',
     'Traduzione: ti servono motore (resistenza), ripetibilità (RSA), accelerazione, freni e cambi di direzione — tutti insieme. È il ruolo atleticamente più esigente del calcio.',
     'Ecco perché nel tuo programma la resistenza e l\'RSA pesano tanto quanto la velocità pura, e perché sono entrate le frenate.',
+    'La settimana separa forza, resistenza e velocità in giorni diversi: è il "microciclo successivo" della scuola spagnola (il metodo di Seirul·lo al Barcellona), dove i contenuti principali non si accavallano. Allenandoti da solo è anche l\'unico modo per dare a ogni qualità il suo giorno pulito.',
+    'E se ti chiedi cosa perdi non avendo le partitelle: nulla, sul piano aerobico. Gli studi mostrano che partitelle e ripetute di corsa migliorano la capacità aerobica allo stesso modo — le prime sono più divertenti, le seconde più precise da dosare.',
   ],
 };
 

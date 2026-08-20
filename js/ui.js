@@ -931,6 +931,34 @@ const UI = {
       html += '<h4 class="titolo-grafico">' + riga[2] + '</h4>' + C.linea(punti, { unita: riga[3], migliora: riga[4], colore: '#38bdf8' });
     }
     const brevi = S.data.test.risultati.brevi;
+    /* profilo forza-velocità: dal confronto fra i 10 m (partenza) e i 30 m (velocità piena)
+       si capisce da che parte conviene spingere. È l'idea che i club ricavano dal GPS. */
+    if (brevi && brevi.length) {
+      const v = brevi[brevi.length - 1].valori;
+      if (v.sprint10 && v.sprint30 && v.sprint30 > v.sprint10) {
+        const volante = Math.round((v.sprint30 - v.sprint10) * 100) / 100;
+        const rapporto = Math.round(v.sprint10 / v.sprint30 * 1000) / 1000;
+        let profilo, consiglio;
+        if (rapporto > 0.44) {
+          profilo = 'Sei più VELOCE che esplosivo';
+          consiglio = 'Il tuo punto debole è la partenza: la forza orizzontale nei primi metri. Insisti su sprint col paracadute, sprint in salita, frenate e carichi pesanti sulle grandi alzate. (Una bassa produzione di forza orizzontale è anche un fattore di rischio per i femorali.)';
+        } else if (rapporto < 0.42) {
+          profilo = 'Sei più esplosivo che VELOCE';
+          consiglio = 'Parti forte ma la velocità piena si esaurisce presto. Insisti sugli sprint lanciati, sulla pliometria e sui balzi; alleggerisci gli sprint resistiti (paracadute e salita) per qualche settimana.';
+        } else {
+          profilo = 'Profilo equilibrato';
+          consiglio = 'Partenza e velocità piena sono in equilibrio: continua a lavorare su entrambe come fa il programma, senza sbilanciarti.';
+        }
+        html += '<div class="card-prep profilo-fv"><h3>⚖️ Il tuo profilo forza-velocità</h3>' +
+          '<div class="stat-riga">' +
+          '<div class="stat"><strong>' + v.sprint10 + 's</strong><span>primi 10 m</span></div>' +
+          '<div class="stat"><strong>' + volante + 's</strong><span>20 m lanciati</span></div>' +
+          '<div class="stat"><strong>' + rapporto + '</strong><span>rapporto</span></div>' +
+          '</div><p class="profilo-esito">' + profilo + '</p>' +
+          '<p class="nota-sixpack">' + consiglio + '</p>' +
+          '<p class="nota-sixpack">È un\'indicazione, non una misura di laboratorio: serve a capire da che parte spingere, non a darti un numero assoluto.</p></div>';
+      }
+    }
     if (brevi && brevi.length) {
       const u = brevi[brevi.length - 1];
       const asim = E.asimmetria(u.valori.hop_sx, u.valori.hop_dx);
